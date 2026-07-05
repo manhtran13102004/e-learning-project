@@ -4,6 +4,10 @@ import { Footer } from "./components/Footer"
 import { Home } from "./pages/Home"
 import { Catalog } from "./pages/Catalog"
 import { CourseDetail } from "./pages/CourseDetail"
+import { Login } from "./pages/Login"
+import { Register } from "./pages/Register"
+import { Degrees } from "./pages/Degrees"
+import { MyLearning } from "./pages/MyLearning"
 
 function App() {
   return (
@@ -15,6 +19,10 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/catalog" element={<Catalog />} />
             <Route path="/course/:id" element={<CourseDetail />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/degrees" element={<Degrees />} />
+            <Route path="/my-learning" element={<MyLearning />} />
           </Routes>
         </main>
         <Footer />

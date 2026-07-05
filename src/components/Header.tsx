@@ -16,11 +16,11 @@ export function Header() {
             <Link to="/catalog" className="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
               Explore
             </Link>
-            <Link to="#" className="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+            <Link to="/degrees" className="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
               Degrees
             </Link>
-            <Link to="#" className="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-              Certificates
+            <Link to="/my-learning" className="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+              My Learning
             </Link>
           </nav>
         </div>
@@ -35,8 +35,12 @@ export function Header() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" className="hidden md:flex">Log In</Button>
-          <Button className="hidden md:flex rounded-full">Join for Free</Button>
+          <Link to="/login">
+            <Button variant="ghost" className="hidden md:flex">Log In</Button>
+          </Link>
+          <Link to="/register">
+            <Button className="hidden md:flex rounded-full">Join for Free</Button>
+          </Link>
           <Button variant="ghost" size="icon" className="md:hidden">
             <Search className="h-5 w-5" />
           </Button>
