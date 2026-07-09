@@ -1,9 +1,32 @@
-import { Link } from "react-router-dom"
+import { useState, type FormEvent } from "react"
+import { Link, useNavigate } from "react-router-dom"
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { BookOpen } from "lucide-react"
+import { authService } from "../services/auth-service"
 
 export function Register() {
+  const navigate = useNavigate()
+  const [fullName, setFullName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setError(null)
+    setIsSubmitting(true)
+    try {
+      await authService.register({ email, password, fullName })
+      navigate("/")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Đăng ký thất bại")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <div className="container relative min-h-[calc(100vh-14rem)] flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
@@ -32,7 +55,7 @@ export function Register() {
             </p>
           </div>
           <div className="grid gap-6">
-            <form onSubmit={(e) => e.preventDefault()}>
+            <form onSubmit={handleSubmit}>
               <div className="grid gap-4">
                 <div className="grid gap-1">
                   <label className="sr-only" htmlFor="name">
@@ -45,6 +68,9 @@ export function Register() {
                     autoCapitalize="words"
                     autoComplete="name"
                     autoCorrect="off"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required
                   />
                 </div>
                 <div className="grid gap-1">
@@ -58,6 +84,9 @@ export function Register() {
                     autoCapitalize="none"
                     autoComplete="email"
                     autoCorrect="off"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
                   />
                 </div>
                 <div className="grid gap-1">
@@ -69,10 +98,16 @@ export function Register() {
                     placeholder="Password"
                     type="password"
                     autoComplete="new-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
                   />
                 </div>
-                <Button>
-                  Sign Up
+                {error && (
+                  <p className="text-sm text-destructive">{error}</p>
+                )}
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Signing up..." : "Sign Up"}
                 </Button>
               </div>
             </form>

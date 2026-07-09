@@ -1,5 +1,5 @@
 import { Button } from "../components/ui/button"
-import { BookOpen, PlayCircle, CheckCircle, Clock } from "lucide-react"
+import { BookOpen, CheckCircle, Clock } from "lucide-react"
 
 export function MyLearning() {
   const inProgressCourses = [

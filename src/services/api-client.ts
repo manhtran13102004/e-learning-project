@@ -3,22 +3,52 @@
  * In a real Microservices architecture, this would point to the API Gateway
  */
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081/api';
+
+async function request<T>(endpoint: string, options: RequestInit): Promise<T> {
+  const response = await fetch(`${BASE_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+
+  const contentType = response.headers.get('content-type') ?? '';
+  const body = contentType.includes('application/json')
+    ? await response.json()
+    : await response.text();
+
+  if (!response.ok) {
+    const message =
+      body && typeof body === 'object' && 'message' in body
+        ? (body as { message: string }).message
+        : typeof body === 'string' && body
+          ? body
+          : `Request failed with status ${response.status}`;
+    throw new Error(message);
+  }
+
+  return body as T;
+}
 
 export const apiClient = {
-  async get<T>(endpoint: string): Promise<T> {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // For now, we fetch from local mock data or return handled errors
-    // When backend is ready, this will use fetch() or axios
-    console.log(`[API Get] ${BASE_URL}${endpoint}`);
-    throw new Error("Method not implemented. Use mock services for now.");
+  get<T>(endpoint: string): Promise<T> {
+    return request<T>(endpoint, { method: 'GET' });
   },
 
-  async post<T>(endpoint: string, data: any): Promise<T> {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    console.log(`[API Post] ${BASE_URL}${endpoint}`, data);
-    throw new Error("Method not implemented.");
-  }
+  post<T>(endpoint: string, data: unknown): Promise<T> {
+    return request<T>(endpoint, { method: 'POST', body: JSON.stringify(data) });
+  },
+
+  put<T>(endpoint: string, data: unknown): Promise<T> {
+    return request<T>(endpoint, { method: 'PUT', body: JSON.stringify(data) });
+  },
+
+  delete<T>(endpoint: string, data?: unknown): Promise<T> {
+    return request<T>(endpoint, {
+      method: 'DELETE',
+      body: data === undefined ? undefined : JSON.stringify(data),
+    });
+  },
 };

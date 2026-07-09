@@ -1,9 +1,31 @@
-import { Link } from "react-router-dom"
+import { useState, type FormEvent } from "react"
+import { Link, useNavigate } from "react-router-dom"
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { BookOpen } from "lucide-react"
+import { authService } from "../services/auth-service"
 
 export function Login() {
+  const navigate = useNavigate()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setError(null)
+    setIsSubmitting(true)
+    try {
+      await authService.login({ email, password })
+      navigate("/")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Đăng nhập thất bại")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <div className="container relative min-h-[calc(100vh-14rem)] flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
@@ -32,7 +54,7 @@ export function Login() {
             </p>
           </div>
           <div className="grid gap-6">
-            <form onSubmit={(e) => e.preventDefault()}>
+            <form onSubmit={handleSubmit}>
               <div className="grid gap-4">
                 <div className="grid gap-1">
                   <label className="sr-only" htmlFor="email">
@@ -45,6 +67,9 @@ export function Login() {
                     autoCapitalize="none"
                     autoComplete="email"
                     autoCorrect="off"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
                   />
                 </div>
                 <div className="grid gap-1">
@@ -56,10 +81,16 @@ export function Login() {
                     placeholder="Password"
                     type="password"
                     autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
                   />
                 </div>
-                <Button>
-                  Log In
+                {error && (
+                  <p className="text-sm text-destructive">{error}</p>
+                )}
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Logging in..." : "Log In"}
                 </Button>
               </div>
             </form>

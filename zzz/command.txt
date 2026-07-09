@@ -1,0 +1,14 @@
+//Khởi động Consul
+consul agent -dev
+
+//Xem cổng 8081
+netstat -ano | findstr :8081
+
+//kill tiến trình
+taskkill -f -pid 1208
+
+//run service
+../mvnw spring-boot:run
+
+
+

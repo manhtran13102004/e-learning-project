@@ -1,4 +1,4 @@
-import { Course } from '../types';
+import type { Course } from '../types';
 
 // Mock data to simulate Backend response
 const MOCK_COURSES: Course[] = [

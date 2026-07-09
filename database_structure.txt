@@ -1,0 +1,521 @@
+1. Identity & Access Management (IAM) 
+User (Người dùng): Lưu thông tin chung.
+id (Primary Key)
+email
+password_hash
+full_name
+avatar_url
+bio
+created_at
+updated_at
+
+Role:
+id (PK)
+name (GUESS, LEARNER, VIP_MEMBER, INSTRUCTOR, ADMIN)
+Description
+created_at
+updated_at
+
+Permission:
+id (PK)
+name (Ví dụ: course:create
+course:edit
+course:delete
+quiz:grade
+revenue:view)
+description
+
+Role_Permission:
+role_id (FK nối bảng Role)
+permission_id (FK nối bảng Permission)
+Composite PK (role_id, permission_id)
+
+User_Role:
+user_id (FK nối bảng User)
+role_id (FK nối bảng Role)
+Composite PK (user_id, role_id)
+
+User_Permission:
+user_id (FK nối bảng User)
+permission_id (FK nối bảng Permission)
+Composite PK (user_id, Permission_id )
+
+Course_Member_Role:
+id (PK)
+course_id (FK nối bảng Course)
+user_id (FK nối bảng User)
+Role_id (FK nối bảng Role- ví dụ: gán vai trò teaching_assistant riêng cho khóa này)
+
+CourseMember_Permission:
+id (PK)
+course_id (FK nối bảng Course)
+user_id (FK nối bảng User)
+Permission_id (FK nối bảng Permission - ví dụ: gán vai trò teaching_assistant riêng cho khóa này)
+2. Product Catalog 
+
+Product
+Id
+type (COURSE | SPECIALIZATION | SUBSCRIPTION)
+Name
+short_description
+Description
+slug
+Price
+thumbnail_url
+Currency
+average_rating
+rating_count 
+status (Active, Inactive)
+created_at
+Updated_at
+created_by
+published_at 
+
+Specialization (Chương trình chuyên sâu): Gom nhiều khóa học lại theo một lộ trình.
+Product_id (PK, FK)
+level (Beginner, Intermediate, Advanced)
+status (enum: Draft, Published, Archived)
+Estimated_duration_unit (HOUR, DAY,  WEEK, MONTH, YEAR)
+Estimated_duration_value
+certificate_enabled 
+
+Course (Khóa học):
+Product_id (PK, FK)
+specialization_id (FK, có thể null nếu là khóa học đơn lẻ)
+level (Beginner, Intermediate, Advanced)
+status (enum: Draft, Published, Archived)
+Estimated_duration_unit (HOUR, DAY, WEEK, MONTH, YEAR)
+Estimated_duration_value
+certificate_enabled 
+
+SubscriptionPlan:
+Product_id (PK, FK)
+Type (Monthly, Yearly)
+Duration_value
+duration_unit
+Status (Active, Inactive)
+
+CourseInstructor
+User_id
+Course_id
+Status (Active, Inactive)
+Created_at
+updated_at
+
+Skill
+id
+domain_id (FK)
+name
+slug
+description
+status (ACTIVE, INACTIVE)
+created_at
+updated_at 
+
+SkillDomain
+id
+name
+slug
+description
+status (ACTIVE, INACTIVE)
+created_at
+updated_at 
+
+CourseSkill
+Course_id
+Skill_id
+Level
+
+Category
+id
+name
+slug
+description
+status (ACTIVE, INACTIVE)
+created_at
+updated_at 
+
+ProductCategory
+product_id
+category_id
+
+
+3. Course Content 
+Course (Khóa học):
+Product_id (PK, FK)
+specialization_id (FK, có thể null nếu là khóa học đơn lẻ)
+level (Beginner, Intermediate, Advanced)
+status (enum: Draft, Published, Archived)
+Estimated_duration_unit (HOUR, DAY, WEEK, MONTH, YEAR)
+Estimated_duration_value
+certificate_enabled 
+
+Section (Tuần học/Chương):
+id
+course_id (FK)
+Title
+Estimated_duration_unit
+estimated_duration_value
+display_order(Thứ tự hiển thị)
+
+Lesson (Bài học nhỏ): Một bài học có thể là Video, Tài liệu đọc hoặc Bài tập.
+id
+section_id (FK)
+title
+estimated_duration_minutes 
+type (enum: Video, Reading, Quiz, ASSIGNMENT )
+display_order,status (enum: Draft, Published, Hidden)
+Is_preview
+created_at
+updated_at
+
+Video_Content (Chi tiết bài học Video):
+lesson_id (FK)
+video_url (Link từ CDN/S3)
+duration_seconds (Thời lượng)
+subtitle_url
+thumbnail_url
+created_at
+Updated_at
+
+Reading_Content (Chi tiết bài học Đọc):
+id
+lesson_id (FK)
+content (Markdown)
+
+
+Quiz (Bài trắc nghiệm):
+id
+lesson_id (FK)
+description
+passing_score
+time_limit_minutes
+max_attempts
+shuffle_questions
+shuffle_options
+status (DRAFT, PUBLISHED)
+created_at
+updated_at 
+
+Assignment
+id
+lesson_id (FK)
+description
+instruction
+max_score
+allow_late_submission
+deadline
+max_file_size_mb
+allowed_file_types (vd: ["pdf","zip","docx"] , …)
+status (Draft, Published)
+created_at
+updated_at 
+
+4. Assessment 
+
+Quiz (Bài trắc nghiệm):
+id
+lesson_id (FK)
+description
+passing_score
+time_limit_minutes
+max_attempts
+shuffle_questions
+shuffle_options
+status (DRAFT, PUBLISHED)
+created_at
+updated_at 
+
+Question (Câu hỏi trong Quiz):
+id
+quiz_id (FK)
+question_text
+type (Single choice, Multiple choice, True/False)
+score
+display_order
+explanation 
+
+Answer_Option (Các lựa chọn đáp án):
+id
+question_id (FK)
+option_text
+is_correct (True/False)
+display_order 
+
+QuizAttempt
+id
+quiz_id
+user_id
+attempt_number
+score
+passed
+started_at
+submitted_at
+time_spent_seconds 
+
+Assignment
+id
+lesson_id (FK)
+description
+instruction
+max_score
+allow_late_submission
+deadline
+max_file_size_mb
+allowed_file_types (vd: ["pdf","zip","docx"] , …)
+status (Draft, Published)
+created_at
+updated_at 
+
+AssignmentSubmission
+id
+assignment_id (FK)
+user_id (FK)
+attempt_number
+submitted_at
+score
+feedback
+status (enum: DRAFT, SUBMITTED, LATE_SUBMITTED, GRADED)
+graded_at
+graded_by (FK user_id)
+
+SubmissionFile
+id
+Submission_id
+original_file_name
+stored_file_name
+file_url
+file_size
+mime_type
+uploaded_at 
+
+
+Certificate (Chứng chỉ):
+id
+user_id (FK)
+product_id (FK)
+verification_url 
+certificate_code (Mã định danh duy nhất để xác thực)
+Pdf_url
+Status (Valid, Revoked)
+issued_at
+
+5. Learning Progress 
+Enrollment (Đăng ký): Bản ghi nối giữa Người dùng và các sản phẩm.
+id
+user_id (FK)
+product_id (FK)
+status (Active, Completed, Dropped)
+Enrolled_at
+Completed_at
+Progress_percent
+last_accessed_at 
+
+CourseProgress
+User_id (FK)
+Course_id (FK)
+status (enum: NOT_STARTED, IN_PROGRESS, COMPLETED)
+Complete_at
+
+LessonProgress
+user_id
+lesson_id
+status (enum: NOT_COMPLETED, COMPLETED) 
+Completed_at
+
+
+Video_Resume:
+user_id
+video_content_id
+current_time_seconds
+last_watched_at 
+Composite PK (user_id, video_content_id)
+
+
+6. Certificate & Skills 
+Certificate (Chứng chỉ):
+id
+user_id (FK)
+product_id (FK)
+verification_url 
+certificate_code (Mã định danh duy nhất để xác thực)
+Pdf_url
+Status (Valid, Revoked)
+Issued_at
+
+Skill
+id
+domain_id (FK)
+name
+slug
+description
+status (ACTIVE, INACTIVE)
+created_at
+updated_at 
+SkillDomain
+id
+name
+slug
+description
+status (ACTIVE, INACTIVE)
+created_at
+updated_at 
+CourseSkill
+Course_id
+Skill_id
+level
+
+
+
+
+
+
+7. Community 
+Discussion_Forum (Diễn đàn thảo luận):
+id
+product_id (FK)
+title
+description
+display_order
+status (ACTIVE, HIDDEN)
+created_at
+updated_at 
+Thread (Bài đăng câu hỏi):
+id
+forum_id
+user_id
+title
+content
+is_pinned
+is_locked
+view_count
+created_at
+updated_at
+
+Comment (Phản hồi):
+id
+thread_id (FK)
+user_id (FK)
+parent_comment_id (Để làm comment nhiều tầng)
+content
+is_accepted 
+edited_at 
+created_at
+
+ThreadVote
+thread_id
+user_id
+vote_type (UP_VOTE, DOWN_VOTE)
+created_at
+
+CommentVote
+comment_id
+User_id
+Vote_type (UP_VOTE, DOWN_VOTE)
+created_at 
+
+Attachment 
+id
+thread_id (nullable)
+comment_id (nullable)
+file_url
+original_file_name
+stored_file_name 
+mime_type 
+file_size
+Upload_at
+
+Review
+Product_id (FK)
+User_id (FK)
+Created_at
+updated_at
+rating
+Content (nullable)
+Status (PENDING, APPROVED, HIDDEN, DELETED)
+
+
+
+8. Commerce 
+
+Order (Đơn hàng):
+id
+user_id (FK)
+total_amount
+status (Pending, Paid, Failed, Refunded)
+Subtotal_amount
+coupon_id
+discount_amount
+total_amount
+currency
+updated_at 
+created_at
+Order_Item (Chi tiết đơn hàng): Một đơn hàng có thể mua nhiều khóa học.
+id
+order_id (FK)
+product_id (FK)
+unit_price (Giá tại thời điểm mua)
+discount_amount
+final_price
+Payment (Giao dịch thực tế): Lưu vết lịch sử làm việc với cổng thanh toán.
+id
+order_id (FK)
+payment_gateway (Stripe, Paypal, MoMo...)
+Payment_method (CREDIT_CARD, DEBIT_CARD, E_WALLET, BANK_TRANSFER, …) 
+gateway_transaction_id
+Amount
+paid_at
+Status (Pending, Success, Failed, Refunded)
+Coupon
+id
+code
+name
+description
+Discount_type (Fixed, Percentage)
+discount_value
+max_discount_amount 
+minimum_order_amount
+Usage_limit
+per_user_limit 
+is_public 
+used_count
+start_at
+end_at
+status 
+
+Refund
+id
+payment_transaction_id
+amount
+reason
+status (PENDING, APPROVED, REJECTED, COMPLETED)
+created_at 
+
+CouponProduct
+Coupon_id
+product_id
+
+
+9. Subscription
+
+UserSubscription:
+id
+User_id (FK)
+order_id (FK)
+subscription_plan_id (FK)
+started_at
+Ended_at
+Auto_renew
+cancelled_at
+Status (Active, Expired, Cancelled)
+
+SubscriptionPlanProduct
+subscription_plan_id
+product_id 
+
+
+CHÚ Ý:
+- Enum type chỉ tạo trong java, ở db thành varchar(30), và luôn UPPERCASE
+- Các biến lưu duration hãy lưu dưới dạng số giây (vd: 2055 thay vì 00:34:15 )
+Tên tất cả các trường đều phải dưới dạng lowercase, nếu có nhiều hơn 2 từ thì dùng dấu gạch dưới (vd: order_id)
+
