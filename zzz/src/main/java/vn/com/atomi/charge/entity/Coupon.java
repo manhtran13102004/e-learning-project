@@ -2,6 +2,7 @@ package vn.com.atomi.charge.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,15 +11,18 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.Set;
 import vn.com.atomi.charge.enums.ActiveStatus;
 import vn.com.atomi.charge.enums.DiscountType;
-
 // Coupon: id, code, name, description, discount_type, discount_value, max_discount_amount,
 // minimum_order_amount, usage_limit, per_user_limit, is_public, used_count, start_at, end_at, status
 
@@ -78,4 +82,12 @@ public class Coupon {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private ActiveStatus status;
+
+    @ManyToMany
+    @JoinTable(
+        name = "coupon_products", // Tên bảng trung gian trong DB
+        joinColumns = @JoinColumn(name = "coupon_id"),
+        inverseJoinColumns = @JoinColumn(name = "product_id")
+    )
+    private Set<Product> products = new HashSet<>();
 }

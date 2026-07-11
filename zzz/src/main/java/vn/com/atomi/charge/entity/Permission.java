@@ -24,12 +24,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Permission {
-//     Permission:
-// id (PK)
-// name (Ví dụ: course:create, course:edit, course:delete
-// quiz:grade
-// revenue:view)
-// description
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

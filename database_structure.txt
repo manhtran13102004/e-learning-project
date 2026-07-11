@@ -4,10 +4,12 @@ id (Primary Key)
 email
 password_hash
 full_name
-avatar_url
+avatar_file_id (FK)
 bio
 created_at
 updated_at
+status (Active, INACTIVE)
+last_active_at
 
 Role:
 id (PK)
@@ -29,11 +31,6 @@ Role_Permission:
 role_id (FK nối bảng Role)
 permission_id (FK nối bảng Permission)
 Composite PK (role_id, permission_id)
-
-User_Role:
-user_id (FK nối bảng User)
-role_id (FK nối bảng Role)
-Composite PK (user_id, role_id)
 
 User_Permission:
 user_id (FK nối bảng User)
@@ -60,8 +57,9 @@ Name
 short_description
 Description
 slug
+sku
 Price
-thumbnail_url
+thumbnail_file_id (FK nullable)
 Currency
 average_rating
 rating_count 
@@ -79,14 +77,16 @@ Estimated_duration_unit (HOUR, DAY,  WEEK, MONTH, YEAR)
 Estimated_duration_value
 certificate_enabled 
 
+
 Course (Khóa học):
 Product_id (PK, FK)
 specialization_id (FK, có thể null nếu là khóa học đơn lẻ)
 level (Beginner, Intermediate, Advanced)
-status (enum: Draft, Published, Archived)
+content_status (enum: Draft, Published, Archived)
 Estimated_duration_unit (HOUR, DAY, WEEK, MONTH, YEAR)
 Estimated_duration_value
 certificate_enabled 
+
 
 SubscriptionPlan:
 Product_id (PK, FK)
@@ -171,10 +171,10 @@ updated_at
 
 Video_Content (Chi tiết bài học Video):
 lesson_id (FK)
-video_url (Link từ CDN/S3)
+video_file_id (FK)
 duration_seconds (Thời lượng)
-subtitle_url
-thumbnail_url
+subtitle_file_id (FK)
+thumbnail_file_id (FK)
 created_at
 Updated_at
 
@@ -281,13 +281,9 @@ graded_by (FK user_id)
 
 SubmissionFile
 id
-Submission_id
-original_file_name
-stored_file_name
-file_url
-file_size
-mime_type
-uploaded_at 
+submission_id (FK)
+file_id (FK)
+created_at
 
 
 Certificate (Chứng chỉ):
@@ -296,7 +292,7 @@ user_id (FK)
 product_id (FK)
 verification_url 
 certificate_code (Mã định danh duy nhất để xác thực)
-Pdf_url
+pdf_file_id (FK)
 Status (Valid, Revoked)
 issued_at
 
@@ -339,7 +335,7 @@ user_id (FK)
 product_id (FK)
 verification_url 
 certificate_code (Mã định danh duy nhất để xác thực)
-Pdf_url
+Pdf_file_id
 Status (Valid, Revoked)
 Issued_at
 
@@ -416,14 +412,10 @@ created_at
 
 Attachment 
 id
+file_id (FK)
 thread_id (nullable)
 comment_id (nullable)
-file_url
-original_file_name
-stored_file_name 
-mime_type 
-file_size
-Upload_at
+created_at
 
 Review
 Product_id (FK)
@@ -509,10 +501,24 @@ Auto_renew
 cancelled_at
 Status (Active, Expired, Cancelled)
 
-SubscriptionPlanProduct
-subscription_plan_id
-product_id 
 
+10 File
+
+FileMetadata
+storage_provider
+file_key
+file_url
+original_file_name
+stored_file_name
+mime_type
+extension
+file_size
+checksum (nullable)
+uploaded_by (FK User)
+visibility
+status
+created_at
+updated_at
 
 CHÚ Ý:
 - Enum type chỉ tạo trong java, ở db thành varchar(30), và luôn UPPERCASE

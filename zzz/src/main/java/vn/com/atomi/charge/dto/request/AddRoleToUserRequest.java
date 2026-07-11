@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 public class AddRoleToUserRequest {
-    private String name;
+    private Long roleId;
 }

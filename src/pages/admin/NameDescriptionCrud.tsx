@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react"
-import { Pencil, Plus, Trash2 } from "lucide-react"
+import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,6 +12,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { SortableTableHead } from "@/components/ui/sortable-table-head"
+import { useSortParams } from "@/hooks/useSortParams"
 import {
   Dialog,
   DialogContent,
@@ -19,6 +21,10 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
+import type { PageResponse, SortParam } from "@/services/admin-service"
+
+type NameDescriptionSortKey = "name" | "description" | "createdAt"
+const PAGE_SIZE = 10
 
 interface NameDescriptionItem {
   id: number
@@ -34,14 +40,14 @@ interface NameDescriptionPayload {
 
 interface NameDescriptionCrudProps<
   T extends NameDescriptionItem,
-  TExtra extends Record<string, unknown> = Record<string, never>,
+  TExtra extends object = Record<string, never>,
 > {
   title: string
   addButtonLabel: string
   dialogTitle: string
   editDialogTitle?: string
   emptyLabel: string
-  load: () => Promise<T[]>
+  load: (page: number, size: number, sort?: SortParam) => Promise<PageResponse<T>>
   create: (payload: NameDescriptionPayload & TExtra) => Promise<T>
   update?: (id: number, payload: NameDescriptionPayload & TExtra) => Promise<T>
   remove: (id: number) => Promise<void>
@@ -56,7 +62,7 @@ const EMPTY_FORM: NameDescriptionPayload = { name: "", description: "" }
 
 export function NameDescriptionCrud<
   T extends NameDescriptionItem,
-  TExtra extends Record<string, unknown> = Record<string, never>,
+  TExtra extends object = Record<string, never>,
 >({
   title,
   addButtonLabel,
@@ -84,20 +90,37 @@ export function NameDescriptionCrud<
   )
   const [isSaving, setIsSaving] = useState(false)
   const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [page, setPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
+  const [totalElements, setTotalElements] = useState(0)
+
+  const { sortState, toggleSort } = useSortParams<NameDescriptionSortKey>()
 
   function loadItems() {
     setLoading(true)
     setError(null)
-    load()
-      .then(setItems)
+    load(
+      page,
+      PAGE_SIZE,
+      sortState.key ? { field: sortState.key, direction: sortState.direction } : { field: "id", direction: "asc" }
+    )
+      .then((res) => {
+        setItems(res.content)
+        setTotalPages(res.totalPages)
+        setTotalElements(res.totalElements)
+      })
       .catch((err) => setError(err instanceof Error ? err.message : "Không tải được dữ liệu"))
       .finally(() => setLoading(false))
   }
 
   useEffect(() => {
+    setPage(0)
+  }, [sortState.key, sortState.direction])
+
+  useEffect(() => {
     loadItems()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [page, sortState.key, sortState.direction])
 
   function openCreateDialog() {
     setEditingId(null)
@@ -120,12 +143,11 @@ export function NameDescriptionCrud<
     const payload = { ...form, ...extraForm } as NameDescriptionPayload & TExtra
     try {
       if (editingId && update) {
-        const updated = await update(editingId, payload)
-        setItems((prev) => prev.map((i) => (i.id === editingId ? updated : i)))
+        await update(editingId, payload)
       } else {
-        const created = await create(payload)
-        setItems((prev) => [...prev, created])
+        await create(payload)
       }
+      loadItems()
       setIsDialogOpen(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Lưu thất bại")
@@ -140,7 +162,7 @@ export function NameDescriptionCrud<
     setError(null)
     try {
       await remove(item.id)
-      setItems((prev) => prev.filter((i) => i.id !== item.id))
+      loadItems()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Xóa thất bại")
     } finally {
@@ -166,10 +188,31 @@ export function NameDescriptionCrud<
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Tên</TableHead>
-              <TableHead>Mô tả</TableHead>
+              <SortableTableHead
+                sortKey="name"
+                activeSortKey={sortState.key}
+                direction={sortState.direction}
+                onSort={toggleSort}
+              >
+                Tên
+              </SortableTableHead>
+              <SortableTableHead
+                sortKey="description"
+                activeSortKey={sortState.key}
+                direction={sortState.direction}
+                onSort={toggleSort}
+              >
+                Mô tả
+              </SortableTableHead>
               {extraColumnHeader && <TableHead>{extraColumnHeader}</TableHead>}
-              <TableHead>Ngày tạo</TableHead>
+              <SortableTableHead
+                sortKey="createdAt"
+                activeSortKey={sortState.key}
+                direction={sortState.direction}
+                onSort={toggleSort}
+              >
+                Ngày tạo
+              </SortableTableHead>
               <TableHead className="text-right">Hành động</TableHead>
             </TableRow>
           </TableHeader>
@@ -218,6 +261,31 @@ export function NameDescriptionCrud<
             ))}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <span>{totalElements} mục</span>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            disabled={page === 0 || loading}
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span>
+            Trang {totalPages === 0 ? 0 : page + 1} / {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="icon"
+            disabled={page + 1 >= totalPages || loading}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

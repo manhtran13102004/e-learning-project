@@ -47,7 +47,7 @@ public class Course extends Product {
     private Level level;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 30)
+    @Column(name = "content_status", nullable = false, length = 30)
     private ContentStatus contentStatus;
 
     @Enumerated(EnumType.STRING)

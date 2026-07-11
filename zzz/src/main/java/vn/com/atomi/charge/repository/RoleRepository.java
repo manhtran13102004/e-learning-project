@@ -9,6 +9,9 @@ import vn.com.atomi.charge.entity.Role;
 
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long> {
+
+    Optional<Role> findById(Long id);
+
     Optional<Role> findByName(String name);
     
     boolean existsById(Long id);

@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -20,7 +21,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 // Video_Content (Chi tiết bài học Video): lesson_id (PK, FK - quan hệ 1-1 chia sẻ PK với
-// Lesson), video_url, duration_seconds, subtitle_url, thumbnail_url, created_at, updated_at
+// Lesson), video_file_id (FK), duration_seconds, subtitle_file_id (FK), thumbnail_file_id (FK),
+// created_at, updated_at
 
 @Entity
 @Table(name = "video_contents")
@@ -39,17 +41,20 @@ public class VideoContent {
     @JoinColumn(name = "lesson_id")
     private Lesson lesson;
 
-    @Column(name = "video_url", nullable = false, length = 500)
-    private String videoUrl;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "video_file_id", nullable = false)
+    private FileMetadata videoFile;
 
     @Column(name = "duration_seconds")
     private Integer durationSeconds;
 
-    @Column(name = "subtitle_url", length = 500)
-    private String subtitleUrl;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subtitle_file_id")
+    private FileMetadata subtitleFile;
 
-    @Column(name = "thumbnail_url", length = 500)
-    private String thumbnailUrl;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "thumbnail_file_id")
+    private FileMetadata thumbnailFile;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

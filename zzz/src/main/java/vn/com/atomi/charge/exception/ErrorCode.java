@@ -1,8 +1,9 @@
 package vn.com.atomi.charge.exception;
 
+import org.springframework.http.HttpStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
@@ -19,7 +20,10 @@ public enum ErrorCode {
     PERMISSION_NOT_FOUND(2003, "Permission not found", HttpStatus.BAD_REQUEST),
     ROLE_PERMISSION_ALREADY_EXISTS(2004, "Role permission already exists", HttpStatus.BAD_REQUEST),
     ROLE_PERMISSION_NOT_FOUND(2005, "Role permission not found", HttpStatus.BAD_REQUEST),
-    ;    
+    FILE_NOT_FOUND(4000, "File not found", HttpStatus.BAD_REQUEST),
+    UNKNOWN_ERROR(9999, "Lỗi hệ thống", HttpStatus.INTERNAL_SERVER_ERROR),
+    ROLE_ALREADY_IN_USE(2006, "Role already in use", HttpStatus.BAD_REQUEST),
+    ;
 
 
     private final int code;

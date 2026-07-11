@@ -21,9 +21,9 @@ public class CreateCourseRequest {
     private String slug;
     private BigDecimal price;
     private String currency;
-    private String thumbnailUrl;
+    private Long thumbnailFileId;
     private Level level;
-    private ContentStatus status;
+    private ContentStatus contentStatus;
     private DurationUnit estimatedDurationUnit;
     private Integer estimatedDurationValue;
     private Boolean certificateEnabled;

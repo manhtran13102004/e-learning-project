@@ -3,116 +3,112 @@ package vn.com.atomi.charge.service;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import lombok.RequiredArgsConstructor;
 import vn.com.atomi.charge.dto.request.CreateRoleRequest;
 import vn.com.atomi.charge.dto.request.UpdateRoleRequest;
 import vn.com.atomi.charge.dto.response.AdminRoleResponse;
 import vn.com.atomi.charge.entity.Permission;
 import vn.com.atomi.charge.entity.Role;
-import vn.com.atomi.charge.entity.RolePermission;
 import vn.com.atomi.charge.exception.AppException;
 import vn.com.atomi.charge.exception.ErrorCode;
+import vn.com.atomi.charge.mapper.RoleMapper;
 import vn.com.atomi.charge.repository.PermissionRepository;
-import vn.com.atomi.charge.repository.RolePermissionRepository;
 import vn.com.atomi.charge.repository.RoleRepository;
+import vn.com.atomi.charge.repository.UserRepository;
 
 @Service
+@RequiredArgsConstructor
 public class RoleService {
     
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
-    private final RolePermissionRepository rolePermissionRepository;
+    private final UserRepository userRepository;
+    private final RoleMapper roleMapper;
     
-    public RoleService(RoleRepository roleRepository, PermissionRepository permissionRepository, 
-            RolePermissionRepository rolePermissionRepository) {
-                this.roleRepository = roleRepository;
-                this.permissionRepository = permissionRepository;
-                this.rolePermissionRepository = rolePermissionRepository;
-            }
+    
 
+    @Transactional
     public AdminRoleResponse createRole(CreateRoleRequest request) {
+        
+        if (roleRepository.existsByName(request.getName())) {
+            throw new AppException(ErrorCode.ROLE_ALREADY_EXISTS);
+        }
+        
         Role role = Role.builder() 
             .name(request.getName())
             .description(request.getDescription())
             .build();
         
-        if (roleRepository.existsByName(request.getName())) {
-            throw new AppException(ErrorCode.ROLE_ALREADY_EXISTS);
-        }
-        roleRepository.save(role);
 
+
+        roleRepository.save(role);
         List<Long> permissionIds = request.getPermissionIds();
         if (permissionIds != null) {
             permissionIds.forEach(p_id -> {
             Permission permission = permissionRepository.findById(p_id).orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND));
-            rolePermissionRepository.save(RolePermission.builder()
-                .role(role)
-                .permission(permission)
-                .build());
+            role.getPermissions().add(permission);
             });
         }
-        return toResponse(role);
+
+        
+        return roleMapper.toAdminDto(role);
 
     }
 
     public List<AdminRoleResponse> getAll() {
         return roleRepository.findAll().stream()
-                .map(this::toResponse)
+                .map(roleMapper::toAdminDto)
                 .toList();
     }
 
-    public Page<AdminRoleResponse> getAllWithPagination(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<AdminRoleResponse> getAllWithPagination(Pageable pageable) {
+        
         Page<Role> roles = roleRepository.findAll(pageable);
-        return roles.map(this::toResponse);
+        return roles.map(roleMapper::toAdminDto);
     }
 
     public AdminRoleResponse updateRole(Long id, UpdateRoleRequest request) {
         Role role = roleRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
         role.setName(request.getName());
         role.setDescription(request.getDescription());
-        return toResponse(roleRepository.save(role));
+        return roleMapper.toAdminDto(roleRepository.save(role));
     }
 
+    @Transactional
     public void deleteRole(Long id) {
-        if (!roleRepository.existsById(id)) {
-            throw new AppException(ErrorCode.ROLE_NOT_FOUND);
+        Role role = roleRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+        
+
+        if(userRepository.existsByRoles_Id(id)){
+            throw new AppException(ErrorCode.ROLE_ALREADY_IN_USE);
         }
+        
         roleRepository.deleteById(id);
     }
 
-    public void addRolePermission(Long roleId, Long permissionId) {
+    public void addPermission(Long roleId, Long permissionId) {
         Role role = roleRepository.findById(roleId).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
         Permission permission = permissionRepository.findById(permissionId).orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND));
-        if (rolePermissionRepository.existsByRole_IdAndPermission_Id(roleId, permissionId)) {
+        if (role.getPermissions().contains(permission)) {
             throw new AppException(ErrorCode.ROLE_PERMISSION_ALREADY_EXISTS);
         }
-        rolePermissionRepository.save(RolePermission.builder().role(role).permission(permission).build());
+        role.getPermissions().add(permission);
+        roleRepository.save(role);
     }
 
-    public void removeRolePermission(Long roleId, Long permissionId) {
+    public void removePermission(Long roleId, Long permissionId) {
         
-        if (!rolePermissionRepository.existsByRole_IdAndPermission_Id(roleId, permissionId)) {
+        Role role = roleRepository.findById(roleId).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+        Permission permission = permissionRepository.findById(permissionId).orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND));
+        if (!role.getPermissions().contains(permission)) {
             throw new AppException(ErrorCode.ROLE_PERMISSION_NOT_FOUND);
         }
-
-        rolePermissionRepository.deleteByRole_IdAndPermission_Id(roleId, permissionId);
+        role.getPermissions().remove(permission);
+        roleRepository.save(role);
     }
 
-    private AdminRoleResponse toResponse(Role role) {
-        List<String> permissions = rolePermissionRepository.findByRole_Id(role.getId()).stream()
-                .map(rolePermission -> rolePermission.getPermission().getName())
-                .toList();
-        return AdminRoleResponse.builder()
-                .id(role.getId())
-                .name(role.getName())
-                .description(role.getDescription())
-                .permissions(permissions)
-                .createdAt(role.getCreatedAt())
-                .updatedAt(role.getUpdatedAt())
-                .build();
-    }
 }

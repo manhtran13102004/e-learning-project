@@ -3,32 +3,31 @@ package vn.com.atomi.charge.service;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import lombok.RequiredArgsConstructor;
 import vn.com.atomi.charge.dto.request.AdminPermissionRequest;
 import vn.com.atomi.charge.dto.response.AdminPermissionResponse;
 import vn.com.atomi.charge.entity.Permission;
 import vn.com.atomi.charge.exception.AppException;
 import vn.com.atomi.charge.exception.ErrorCode;
+import vn.com.atomi.charge.mapper.PermissionMapper;
 import vn.com.atomi.charge.repository.PermissionRepository;
 
+@RequiredArgsConstructor
 @Service
 public class PermissionService {
 
     private final PermissionRepository permissionRepository;
+    private final PermissionMapper permissionMapper;
 
-    public PermissionService(PermissionRepository permissionRepository) {
-        this.permissionRepository = permissionRepository;
-    }
 
     public List<AdminPermissionResponse> getAll(){
         return permissionRepository.findAll().stream().map(this::toResponse).toList();
     }
 
-    public Page<AdminPermissionResponse> getAllWithPagination(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<AdminPermissionResponse> getAllWithPagination(Pageable pageable) {
         Page<Permission> permissions = permissionRepository.findAll(pageable);
         return permissions.map(this::toResponse);
     }
@@ -39,12 +38,6 @@ public class PermissionService {
                 .description(permissionRequest.getDescription())
                 .build();
         return toResponse(permissionRepository.save(permission));
-    }
-
-    public List<AdminPermissionResponse> listPermissions() {
-        return permissionRepository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
     }
 
     public AdminPermissionResponse updatePermission(Long id, AdminPermissionRequest permissionRequest) {
@@ -62,13 +55,7 @@ public class PermissionService {
     }
 
     private AdminPermissionResponse toResponse(Permission permission) {
-        return AdminPermissionResponse.builder()
-                .id(permission.getId())
-                .name(permission.getName())
-                .description(permission.getDescription())
-                .createdAt(permission.getCreatedAt())
-                .updatedAt(permission.getUpdatedAt())
-                .build();
+        return permissionMapper.toAdminDto(permission);
     }
 
 }

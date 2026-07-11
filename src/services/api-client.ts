@@ -6,10 +6,11 @@
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081/api';
 
 async function request<T>(endpoint: string, options: RequestInit): Promise<T> {
+  const isFormData = options.body instanceof FormData;
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...options.headers,
     },
   });
@@ -39,6 +40,10 @@ export const apiClient = {
 
   post<T>(endpoint: string, data: unknown): Promise<T> {
     return request<T>(endpoint, { method: 'POST', body: JSON.stringify(data) });
+  },
+
+  postForm<T>(endpoint: string, formData: FormData): Promise<T> {
+    return request<T>(endpoint, { method: 'POST', body: formData });
   },
 
   put<T>(endpoint: string, data: unknown): Promise<T> {

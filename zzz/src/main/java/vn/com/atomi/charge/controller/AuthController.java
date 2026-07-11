@@ -9,15 +9,15 @@ import org.springframework.web.bind.annotation.RestController;
 import vn.com.atomi.charge.dto.request.LoginRequest;
 import vn.com.atomi.charge.dto.request.RegisterRequest;
 import vn.com.atomi.charge.dto.response.BaseResponse;
-import vn.com.atomi.charge.service.AllService;
+import vn.com.atomi.charge.service.AuthService;
 
 @RestController
 @RequestMapping("api/auth")
 public class AuthController {
 
-    private final AllService authenticationService;
+    private final AuthService authenticationService;
 
-    public AuthController(AllService authenticationService) {
+    public AuthController(AuthService authenticationService) {
         this.authenticationService = authenticationService;
     }
     @PostMapping("login")

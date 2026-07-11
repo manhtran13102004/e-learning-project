@@ -18,11 +18,8 @@ export function AdminRoles() {
 
   function getExtraFormValue(item: AdminRole | null): RoleExtraForm {
     if (!item) return { permissionIds: [] }
-    const idsByName = new Map(permissions.map((p) => [p.name, p.id]))
     return {
-      permissionIds: item.permissions
-        .map((name) => idsByName.get(name))
-        .filter((id): id is number => id !== undefined),
+      permissionIds: item.permissions.map((permission) => permission.id),
     }
   }
 
@@ -33,7 +30,7 @@ export function AdminRoles() {
       dialogTitle="Thêm role"
       editDialogTitle="Sửa role"
       emptyLabel="Chưa có role nào"
-      load={adminService.listRoles}
+      load={adminService.listRolesPage}
       create={adminService.createRole}
       update={adminService.updateRole}
       remove={adminService.deleteRole}
@@ -43,8 +40,8 @@ export function AdminRoles() {
         <div className="flex flex-wrap gap-1">
           {item.permissions.length === 0 && <span className="text-muted-foreground">—</span>}
           {item.permissions.map((permission) => (
-            <Badge key={permission} variant="secondary">
-              {permission}
+            <Badge key={permission.id} variant="secondary">
+              {permission.name}
             </Badge>
           ))}
         </div>

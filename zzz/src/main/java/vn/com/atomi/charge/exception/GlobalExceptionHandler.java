@@ -41,4 +41,13 @@ public class GlobalExceptionHandler {
                 .build();
         return ResponseEntity.status(e.getErrorCode().getHttpStatus()).body(apiResponse);
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<BaseResponse<Object>> handleException(Exception e) {
+        BaseResponse<Object> apiResponse = BaseResponse.builder()
+                .code(ErrorCode.UNKNOWN_ERROR.getCode())
+                .message(ErrorCode.UNKNOWN_ERROR.getMessage())
+                .build();
+        return ResponseEntity.status(ErrorCode.UNKNOWN_ERROR.getHttpStatus()).body(apiResponse);
+    }
 }

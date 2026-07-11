@@ -6,13 +6,64 @@ interface BaseResponse<T> {
   result: T;
 }
 
+export interface UserRoleRef {
+  id: number;
+  name: string;
+}
+
 export interface AdminUser {
   id: number;
   email: string;
   fullName: string;
-  avatarUrl: string | null;
-  roles: string[];
+  avatarFileId: number | null;
+  avatarFileUrl: string | null;
+  bio: string | null;
+  userStatus: UserStatus | null;
+  roles: UserRoleRef[] | null;
   createdAt: string;
+}
+
+export interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+  first: boolean;
+  last: boolean;
+}
+
+export interface CreateUserPayload {
+  email: string;
+  password: string;
+  fullName: string;
+  bio?: string;
+  avatarFileId?: number;
+  roleIds?: number[];
+}
+
+export interface UpdateUserPayload {
+  fullName: string;
+  bio?: string;
+  avatarFileId?: number;
+}
+
+export type UserStatus = 'ACTIVE' | 'BANNED' | 'PENDING';
+
+export interface UserFilters {
+  keyword?: string;
+  status?: UserStatus;
+  roleIds?: number[];
+  fromCreatedDate?: string;
+  toCreatedDate?: string;
+}
+
+export interface UploadedFile {
+  id: number;
+  fileUrl: string;
+  originalFileName: string;
+  mimeType: string | null;
+  fileSize: number | null;
 }
 
 export type CourseLevel = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
@@ -27,9 +78,10 @@ export interface AdminCourse {
   slug: string;
   price: number;
   currency: string | null;
-  thumbnailUrl: string | null;
+  thumbnailFileId: number | null;
+  thumbnailFileUrl: string | null;
   level: CourseLevel;
-  status: CourseContentStatus;
+  contentStatus: CourseContentStatus;
   estimatedDurationUnit: DurationUnit | null;
   estimatedDurationValue: number | null;
   certificateEnabled: boolean | null;
@@ -44,27 +96,12 @@ export interface CoursePayload {
   slug: string;
   price: number;
   currency?: string;
-  thumbnailUrl?: string;
+  thumbnailFileId?: number;
   level: CourseLevel;
-  status: CourseContentStatus;
+  contentStatus: CourseContentStatus;
   estimatedDurationUnit?: DurationUnit;
   estimatedDurationValue?: number;
   certificateEnabled?: boolean;
-}
-
-export interface AdminRole {
-  id: number;
-  name: string;
-  description: string | null;
-  permissions: string[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface RolePayload {
-  name: string;
-  description?: string;
-  permissionIds?: number[];
 }
 
 export interface AdminPermission {
@@ -75,28 +112,104 @@ export interface AdminPermission {
   updatedAt: string;
 }
 
+export interface AdminRole {
+  id: number;
+  name: string;
+  description: string | null;
+  permissions: AdminPermission[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RolePayload {
+  name: string;
+  description?: string;
+  permissionIds?: number[];
+}
+
 export interface PermissionPayload {
   name: string;
   description?: string;
 }
 
+export type SortDir = 'asc' | 'desc';
+
+/** Maps to Spring Data's native `sort=field,direction` request param understood by any `Pageable` argument. */
+export interface SortParam {
+  field: string;
+  direction: SortDir;
+}
+
+function appendSort(params: URLSearchParams, sort?: SortParam): void {
+  if (!sort) return;
+  params.set('sort', `${sort.field},${sort.direction}`);
+}
+
 export const adminService = {
-  async listUsers(): Promise<AdminUser[]> {
-    const res = await apiClient.get<BaseResponse<AdminUser[]>>('/admin/users');
+  async listUsersPage(
+    page: number,
+    size: number,
+    filters?: UserFilters,
+    sort?: SortParam
+  ): Promise<PageResponse<AdminUser>> {
+    const params = new URLSearchParams();
+    params.set('page', String(page));
+    params.set('size', String(size));
+    if (filters?.keyword) params.set('keyword', filters.keyword);
+    if (filters?.status) params.set('userStatus', filters.status);
+    if (filters?.fromCreatedDate) params.set('fromCreatedDate', filters.fromCreatedDate);
+    if (filters?.toCreatedDate) params.set('toCreatedDate', filters.toCreatedDate);
+    filters?.roleIds?.forEach((id) => params.append('roleIds', String(id)));
+    appendSort(params, sort);
+
+    const res = await apiClient.get<BaseResponse<PageResponse<AdminUser>>>(
+      `/admin/users/search?${params.toString()}`
+    );
     return res.result;
   },
 
-  async addRole(userId: number, roleName: string): Promise<AdminUser> {
-    const res = await apiClient.post<BaseResponse<AdminUser>>(`/admin/users/${userId}/roles`, {
-      roleName,
+  async uploadFile(file: File): Promise<UploadedFile> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await apiClient.postForm<BaseResponse<UploadedFile>>('/admin/files', formData);
+    return res.result;
+  },
+
+  async createUser(payload: CreateUserPayload): Promise<AdminUser> {
+    const { roleIds, ...rest } = payload;
+    const res = await apiClient.post<BaseResponse<AdminUser>>('/admin/users', {
+      ...rest,
+      roles: (roleIds ?? []).map((id) => ({ id })),
     });
     return res.result;
   },
 
-  async removeRole(userId: number, roleName: string): Promise<AdminUser> {
-    const res = await apiClient.delete<BaseResponse<AdminUser>>(
-      `/admin/users/${userId}/roles/${encodeURIComponent(roleName)}`
-    );
+  async updateUser(id: number, payload: UpdateUserPayload): Promise<AdminUser> {
+    const res = await apiClient.put<BaseResponse<AdminUser>>(`/admin/users/${id}`, payload);
+    return res.result;
+  },
+
+  async banUser(id: number): Promise<AdminUser> {
+    const res = await apiClient.put<BaseResponse<AdminUser>>(`/admin/users/${id}/ban`, undefined);
+    return res.result;
+  },
+
+  async unbanUser(id: number): Promise<AdminUser> {
+    const res = await apiClient.put<BaseResponse<AdminUser>>(`/admin/users/${id}/unban`, undefined);
+    return res.result;
+  },
+
+  async addRole(userId: number, roleId: number): Promise<AdminUser> {
+    const res = await apiClient.post<BaseResponse<AdminUser>>(`/admin/users/${userId}/roles`, {
+      roleId,
+    });
+    return res.result;
+  },
+
+  async removeRole(userId: number, roleId: number): Promise<AdminUser> {
+    const res = await apiClient.delete<BaseResponse<AdminUser>>(`/admin/users/${userId}/roles`, {
+      roleId,
+    });
     return res.result;
   },
 
@@ -106,6 +219,17 @@ export const adminService = {
 
   async listCourses(): Promise<AdminCourse[]> {
     const res = await apiClient.get<BaseResponse<AdminCourse[]>>('/admin/courses');
+    return res.result;
+  },
+
+  async listCoursesPage(page: number, size: number, sort?: SortParam): Promise<PageResponse<AdminCourse>> {
+    const params = new URLSearchParams();
+    params.set('page', String(page));
+    params.set('size', String(size));
+    appendSort(params, sort);
+    const res = await apiClient.get<BaseResponse<PageResponse<AdminCourse>>>(
+      `/admin/courses/page?${params.toString()}`
+    );
     return res.result;
   },
 
@@ -128,6 +252,17 @@ export const adminService = {
     return res.result;
   },
 
+  async listRolesPage(page: number, size: number, sort?: SortParam): Promise<PageResponse<AdminRole>> {
+    const params = new URLSearchParams();
+    params.set('page', String(page));
+    params.set('size', String(size));
+    appendSort(params, sort);
+    const res = await apiClient.get<BaseResponse<PageResponse<AdminRole>>>(
+      `/admin/roles/page?${params.toString()}`
+    );
+    return res.result;
+  },
+
   async createRole(payload: RolePayload): Promise<AdminRole> {
     const res = await apiClient.post<BaseResponse<AdminRole>>('/admin/roles', payload);
     return res.result;
@@ -144,6 +279,21 @@ export const adminService = {
 
   async listPermissions(): Promise<AdminPermission[]> {
     const res = await apiClient.get<BaseResponse<AdminPermission[]>>('/admin/permissions');
+    return res.result;
+  },
+
+  async listPermissionsPage(
+    page: number,
+    size: number,
+    sort?: SortParam
+  ): Promise<PageResponse<AdminPermission>> {
+    const params = new URLSearchParams();
+    params.set('page', String(page));
+    params.set('size', String(size));
+    appendSort(params, sort);
+    const res = await apiClient.get<BaseResponse<PageResponse<AdminPermission>>>(
+      `/admin/permissions/page?${params.toString()}`
+    );
     return res.result;
   },
 

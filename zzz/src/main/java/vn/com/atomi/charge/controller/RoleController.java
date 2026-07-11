@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,14 +44,11 @@ public class RoleController {
     }
 
     @GetMapping("/page")
-    public ResponseEntity<BaseResponse<Page<AdminRoleResponse>>> getAllWithPagination(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
-    ) {
+    public ResponseEntity<BaseResponse<Page<AdminRoleResponse>>> getAllWithPagination(Pageable pageable) {
         BaseResponse<Page<AdminRoleResponse>> response = BaseResponse.<Page<AdminRoleResponse>>builder()
                 .code(200)
                 .message("OK")
-                .result(roleService.getAllWithPagination(page, size))
+                .result(roleService.getAllWithPagination(pageable))
                 .build();
         return ResponseEntity.ok(response);
     }

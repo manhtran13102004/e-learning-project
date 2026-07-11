@@ -1,6 +1,9 @@
 package vn.com.atomi.charge.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,14 +12,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import vn.com.atomi.charge.dto.request.AdminPermissionRequest;
 import vn.com.atomi.charge.dto.response.AdminPermissionResponse;
 import vn.com.atomi.charge.dto.response.BaseResponse;
 import vn.com.atomi.charge.service.PermissionService;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/permissions")
@@ -40,11 +41,9 @@ public class AdminPermissionController {
     }
 
     @GetMapping("/page")
-    public ResponseEntity<BaseResponse<Page<AdminPermissionResponse>>> getAllWithPagination(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<BaseResponse<Page<AdminPermissionResponse>>> getAllWithPagination(Pageable pageable) {
 
-        Page<AdminPermissionResponse> permissionsPage = permissionService.getAllWithPagination(page, size);
+        Page<AdminPermissionResponse> permissionsPage = permissionService.getAllWithPagination(pageable);
 
         BaseResponse<Page<AdminPermissionResponse>> response = BaseResponse.<Page<AdminPermissionResponse>>builder()
                 .code(200)

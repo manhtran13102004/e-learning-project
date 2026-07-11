@@ -2,7 +2,8 @@ package vn.com.atomi.charge.entity;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -11,14 +12,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// SubmissionFile: id, submission_id, original_file_name, stored_file_name, file_url,
-// file_size, mime_type, uploaded_at
+// SubmissionFile: id, submission_id (FK), file_id (FK), created_at
 
 @Entity
 @Table(name = "submission_files")
@@ -37,21 +38,11 @@ public class SubmissionFile {
     @JoinColumn(name = "submission_id", nullable = false)
     private AssignmentSubmission submission;
 
-    @Column(name = "original_file_name", nullable = false, length = 255)
-    private String originalFileName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "file_id", nullable = false)
+    private FileMetadata file;
 
-    @Column(name = "stored_file_name", nullable = false, length = 255)
-    private String storedFileName;
-
-    @Column(name = "file_url", nullable = false, length = 500)
-    private String fileUrl;
-
-    @Column(name = "file_size")
-    private Long fileSize;
-
-    @Column(name = "mime_type", length = 150)
-    private String mimeType;
-
-    @Column(name = "uploaded_at")
-    private LocalDateTime uploadedAt;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 }

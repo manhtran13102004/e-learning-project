@@ -9,7 +9,7 @@ export function AdminPermissions() {
       dialogTitle="Thêm permission"
       editDialogTitle="Sửa permission"
       emptyLabel="Chưa có permission nào"
-      load={adminService.listPermissions}
+      load={adminService.listPermissionsPage}
       create={adminService.createPermission}
       update={adminService.updatePermission}
       remove={adminService.deletePermission}

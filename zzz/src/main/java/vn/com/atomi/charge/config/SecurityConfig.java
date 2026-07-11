@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -22,12 +24,15 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // .authorizeHttpRequests(auth -> auth
+                //         .requestMatchers("/api/auth/**").permitAll()
+                //         // TODO: tạm thời mở /api/admin/** vì FE chưa có auth/role check - siết lại (role=ADMIN) khi có JWT
+                //         .requestMatchers("/api/admin/**").permitAll()
+                //         .anyRequest().authenticated()
+                // );
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        // TODO: tạm thời mở /api/admin/** vì FE chưa có auth/role check - siết lại (role=ADMIN) khi có JWT
-                        .requestMatchers("/api/admin/**").permitAll()
-                        .anyRequest().authenticated()
-                );
+                .anyRequest().permitAll()
+            );
         return http.build();
     }
 
@@ -42,5 +47,10 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(); // 🌟 Thuật toán băm mật khẩu chuẩn quốc tế
     }
 }

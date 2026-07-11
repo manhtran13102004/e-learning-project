@@ -9,9 +9,9 @@ export function AdminDashboard() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    Promise.all([adminService.listUsers(), adminService.listCourses()])
-      .then(([users, courses]) => {
-        setUserCount(users.length)
+    Promise.all([adminService.listUsersPage(0, 1), adminService.listCourses()])
+      .then(([usersPage, courses]) => {
+        setUserCount(usersPage.totalElements)
         setCourseCount(courses.length)
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Không tải được dữ liệu"))

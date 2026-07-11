@@ -21,7 +21,7 @@ import lombok.Setter;
 import vn.com.atomi.charge.enums.CertificateStatus;
 
 // Certificate (Chứng chỉ): id, user_id, product_id, verification_url, certificate_code,
-// pdf_url, status (Valid/Revoked), issued_at
+// pdf_file_id (FK), status (Valid/Revoked), issued_at
 
 @Entity
 @Table(name = "certificates")
@@ -50,8 +50,9 @@ public class Certificate {
     @Column(name = "certificate_code", nullable = false, unique = true, length = 100)
     private String certificateCode;
 
-    @Column(name = "pdf_url", length = 500)
-    private String pdfUrl;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pdf_file_id")
+    private FileMetadata pdfFile;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)

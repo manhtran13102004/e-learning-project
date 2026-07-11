@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 public class DeleteRoleFromUserRequest {
-    private String roleName;
+    private Long roleId;
 }

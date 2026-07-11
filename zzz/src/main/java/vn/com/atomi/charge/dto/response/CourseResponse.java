@@ -4,31 +4,26 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+import vn.com.atomi.charge.dto.response.SpecializationResponse;
 import vn.com.atomi.charge.enums.ContentStatus;
 import vn.com.atomi.charge.enums.DurationUnit;
 import vn.com.atomi.charge.enums.Level;
 
-@Builder
+
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class CourseResponse {
-    private Long id;
-    private String name;
-    private String shortDescription;
-    private String description;
-    private String slug;
-    private BigDecimal price;
-    private String currency;
-    private String thumbnailUrl;
+public class CourseResponse extends ProductResponse{
+    private SpecializationResponse specialization;
     private Level level;
-    private ContentStatus status;
+    private ContentStatus contentStatus;
     private DurationUnit estimatedDurationUnit;
     private Integer estimatedDurationValue;
     private Boolean certificateEnabled;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }

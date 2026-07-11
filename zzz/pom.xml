@@ -253,6 +253,19 @@
             <artifactId>docx4j-JAXB-ReferenceImpl</artifactId>
             <version>11.4.9</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>1.6.3</version> <!-- Hoặc version mới nhất phù hợp với bạn -->
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>1.6.3</version>
+            <scope>provided</scope>
+        </dependency>
+        
     </dependencies>
 
     <build>

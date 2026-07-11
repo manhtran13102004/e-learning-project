@@ -17,9 +17,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Check;
+import org.hibernate.annotations.CreationTimestamp;
 
-// Attachment: id, thread_id (nullable), comment_id (nullable), file_url, original_file_name,
-// stored_file_name, mime_type, file_size, uploaded_at
+// Attachment: id, file_id (FK), thread_id (nullable), comment_id (nullable), created_at
 //
 // Một attachment phải thuộc về thread hoặc comment (không được cả hai cùng null) -> CHECK constraint.
 
@@ -45,21 +45,11 @@ public class Attachment {
     @JoinColumn(name = "comment_id", nullable = true)
     private Comment comment;
 
-    @Column(name = "file_url", nullable = false, length = 500)
-    private String fileUrl;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "file_id", nullable = false)
+    private FileMetadata file;
 
-    @Column(name = "original_file_name", nullable = false, length = 255)
-    private String originalFileName;
-
-    @Column(name = "stored_file_name", nullable = false, length = 255)
-    private String storedFileName;
-
-    @Column(name = "mime_type", length = 150)
-    private String mimeType;
-
-    @Column(name = "file_size")
-    private Long fileSize;
-
-    @Column(name = "uploaded_at")
-    private LocalDateTime uploadedAt;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 }

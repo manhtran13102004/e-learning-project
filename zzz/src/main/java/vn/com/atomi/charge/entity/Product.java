@@ -2,6 +2,7 @@ package vn.com.atomi.charge.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -19,6 +20,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -27,11 +29,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.atomi.charge.enums.ActiveStatus;
-
+import java.util.Set;
 // Product:
 // id, type (COURSE|SPECIALIZATION|SUBSCRIPTION) là discriminator -> Course/Specialization/SubscriptionPlan
 // kế thừa bảng này (JOINED inheritance), name, short_description, description, slug, price,
-// thumbnail_url, currency, average_rating, rating_count, status, created_at, updated_at, created_by, published_at
+// thumbnail_file_id (FK nullable), currency, average_rating, rating_count, status, created_at,
+// updated_at, created_by, published_at
 
 @Entity
 @Table(name = "products")
@@ -60,11 +63,15 @@ public class Product {
     @Column(nullable = false, unique = true, length = 255)
     private String slug;
 
+    @Column(name = "sku", unique = true, length = 50)
+    private String sku;
+
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
 
-    @Column(name = "thumbnail_url", length = 500)
-    private String thumbnailUrl;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "thumbnail_file_id")
+    private FileMetadata thumbnailFile;
 
     @Column(length = 10)
     private String currency;
@@ -93,4 +100,7 @@ public class Product {
 
     @Column(name = "published_at")
     private LocalDateTime publishedAt;
+
+    @ManyToMany(mappedBy = "products") // Trỏ đúng tên field bên lớp Coupon
+    private Set<Coupon> coupons = new HashSet<>();
 }
