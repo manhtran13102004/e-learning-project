@@ -21,13 +21,13 @@ public class ProductSearchRequest {
 
     private String keyword;
 
-    @Size(max = 50)
+    @Size(max = 50, message = "SKU_FILTER_TOO_LONG")
     private String sku;
 
-    @Positive
+    @Positive(message = "PRICE_FILTER_INVALID")
     private BigDecimal minPrice;
 
-    @Positive
+    @Positive(message = "PRICE_FILTER_INVALID")
     private BigDecimal maxPrice;
 
     private ActiveStatus status;

@@ -4,40 +4,24 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
+import vn.com.atomi.charge.dto.request.CreateUserRequest;
+import vn.com.atomi.charge.dto.request.UpdateUserRequest;
 import vn.com.atomi.charge.dto.response.AdminUserResponse;
 import vn.com.atomi.charge.dto.response.PermissionResponse;
 import vn.com.atomi.charge.dto.response.RoleResponse;
 import vn.com.atomi.charge.dto.response.UserResponse;
+import vn.com.atomi.charge.entity.FileMetadata;
 import vn.com.atomi.charge.entity.Permission;
 import vn.com.atomi.charge.entity.Role;
 import vn.com.atomi.charge.entity.User;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-07-11T16:24:52+0700",
+    date = "2026-07-12T11:28:10+0700",
     comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.46.100.v20260624-0231, environment: Java 21.0.11 (Eclipse Adoptium)"
 )
 @Component
 public class UserMapperImpl implements UserMapper {
-
-    @Override
-    public UserResponse toDto(User entity) {
-        if ( entity == null ) {
-            return null;
-        }
-
-        UserResponse.UserResponseBuilder<?, ?> userResponse = UserResponse.builder();
-
-        userResponse.bio( entity.getBio() );
-        userResponse.createdAt( entity.getCreatedAt() );
-        userResponse.email( entity.getEmail() );
-        userResponse.fullName( entity.getFullName() );
-        userResponse.id( entity.getId() );
-        userResponse.roles( roleListToRoleResponseList( entity.getRoles() ) );
-        userResponse.userStatus( entity.getUserStatus() );
-
-        return userResponse.build();
-    }
 
     @Override
     public User toEntity(UserResponse dto) {
@@ -87,6 +71,69 @@ public class UserMapperImpl implements UserMapper {
     }
 
     @Override
+    public User toEntity(CreateUserRequest request) {
+        if ( request == null ) {
+            return null;
+        }
+
+        User.UserBuilder user = User.builder();
+
+        user.email( request.getEmail() );
+        user.fullName( request.getFullName() );
+
+        return user.build();
+    }
+
+    @Override
+    public void updateEntityFromRequest(UpdateUserRequest request, User User) {
+        if ( request == null ) {
+            return;
+        }
+
+        if ( request.getBio() != null ) {
+            User.setBio( request.getBio() );
+        }
+        if ( request.getFullName() != null ) {
+            User.setFullName( request.getFullName() );
+        }
+    }
+
+    @Override
+    public void updateEntityFromAdminRequest(AdminUpdateUserRequest request, User User) {
+        if ( request == null ) {
+            return;
+        }
+
+        if ( request.getBio() != null ) {
+            User.setBio( request.getBio() );
+        }
+        if ( request.getFullName() != null ) {
+            User.setFullName( request.getFullName() );
+        }
+    }
+
+    @Override
+    public UserResponse toDto(User user) {
+        if ( user == null ) {
+            return null;
+        }
+
+        UserResponse.UserResponseBuilder<?, ?> userResponse = UserResponse.builder();
+
+        userResponse.avatarFileId( userAvatarFileId( user ) );
+        userResponse.avatarUrl( userAvatarFileFileUrl( user ) );
+        userResponse.bio( user.getBio() );
+        userResponse.createdAt( user.getCreatedAt() );
+        userResponse.email( user.getEmail() );
+        userResponse.fullName( user.getFullName() );
+        userResponse.id( user.getId() );
+        userResponse.roles( roleListToRoleResponseList( user.getRoles() ) );
+        userResponse.userStatus( user.getUserStatus() );
+
+        return userResponse.build();
+    }
+
+    @Override
     public AdminUserResponse toAdminDto(User user) {
         if ( user == null ) {
             return null;
@@ -94,6 +141,8 @@ public class UserMapperImpl implements UserMapper {
 
         AdminUserResponse.AdminUserResponseBuilder<?, ?> adminUserResponse = AdminUserResponse.builder();
 
+        adminUserResponse.avatarFileId( userAvatarFileId( user ) );
+        adminUserResponse.avatarUrl( userAvatarFileFileUrl( user ) );
         adminUserResponse.bio( user.getBio() );
         adminUserResponse.createdAt( user.getCreatedAt() );
         adminUserResponse.email( user.getEmail() );
@@ -103,65 +152,6 @@ public class UserMapperImpl implements UserMapper {
         adminUserResponse.userStatus( user.getUserStatus() );
 
         return adminUserResponse.build();
-    }
-
-    protected PermissionResponse permissionToPermissionResponse(Permission permission) {
-        if ( permission == null ) {
-            return null;
-        }
-
-        PermissionResponse.PermissionResponseBuilder<?, ?> permissionResponse = PermissionResponse.builder();
-
-        permissionResponse.createdAt( permission.getCreatedAt() );
-        permissionResponse.description( permission.getDescription() );
-        permissionResponse.id( permission.getId() );
-        permissionResponse.name( permission.getName() );
-        permissionResponse.updatedAt( permission.getUpdatedAt() );
-
-        return permissionResponse.build();
-    }
-
-    protected List<PermissionResponse> permissionListToPermissionResponseList(List<Permission> list) {
-        if ( list == null ) {
-            return null;
-        }
-
-        List<PermissionResponse> list1 = new ArrayList<PermissionResponse>( list.size() );
-        for ( Permission permission : list ) {
-            list1.add( permissionToPermissionResponse( permission ) );
-        }
-
-        return list1;
-    }
-
-    protected RoleResponse roleToRoleResponse(Role role) {
-        if ( role == null ) {
-            return null;
-        }
-
-        RoleResponse.RoleResponseBuilder<?, ?> roleResponse = RoleResponse.builder();
-
-        roleResponse.createdAt( role.getCreatedAt() );
-        roleResponse.description( role.getDescription() );
-        roleResponse.id( role.getId() );
-        roleResponse.name( role.getName() );
-        roleResponse.permissions( permissionListToPermissionResponseList( role.getPermissions() ) );
-        roleResponse.updatedAt( role.getUpdatedAt() );
-
-        return roleResponse.build();
-    }
-
-    protected List<RoleResponse> roleListToRoleResponseList(List<Role> list) {
-        if ( list == null ) {
-            return null;
-        }
-
-        List<RoleResponse> list1 = new ArrayList<RoleResponse>( list.size() );
-        for ( Role role : list ) {
-            list1.add( roleToRoleResponse( role ) );
-        }
-
-        return list1;
     }
 
     protected Permission permissionResponseToPermission(PermissionResponse permissionResponse) {
@@ -218,6 +208,81 @@ public class UserMapperImpl implements UserMapper {
         List<Role> list1 = new ArrayList<Role>( list.size() );
         for ( RoleResponse roleResponse : list ) {
             list1.add( roleResponseToRole( roleResponse ) );
+        }
+
+        return list1;
+    }
+
+    private Long userAvatarFileId(User user) {
+        FileMetadata avatarFile = user.getAvatarFile();
+        if ( avatarFile == null ) {
+            return null;
+        }
+        return avatarFile.getId();
+    }
+
+    private String userAvatarFileFileUrl(User user) {
+        FileMetadata avatarFile = user.getAvatarFile();
+        if ( avatarFile == null ) {
+            return null;
+        }
+        return avatarFile.getFileUrl();
+    }
+
+    protected PermissionResponse permissionToPermissionResponse(Permission permission) {
+        if ( permission == null ) {
+            return null;
+        }
+
+        PermissionResponse.PermissionResponseBuilder<?, ?> permissionResponse = PermissionResponse.builder();
+
+        permissionResponse.createdAt( permission.getCreatedAt() );
+        permissionResponse.description( permission.getDescription() );
+        permissionResponse.id( permission.getId() );
+        permissionResponse.name( permission.getName() );
+        permissionResponse.updatedAt( permission.getUpdatedAt() );
+
+        return permissionResponse.build();
+    }
+
+    protected List<PermissionResponse> permissionListToPermissionResponseList(List<Permission> list) {
+        if ( list == null ) {
+            return null;
+        }
+
+        List<PermissionResponse> list1 = new ArrayList<PermissionResponse>( list.size() );
+        for ( Permission permission : list ) {
+            list1.add( permissionToPermissionResponse( permission ) );
+        }
+
+        return list1;
+    }
+
+    protected RoleResponse roleToRoleResponse(Role role) {
+        if ( role == null ) {
+            return null;
+        }
+
+        RoleResponse.RoleResponseBuilder<?, ?> roleResponse = RoleResponse.builder();
+
+        roleResponse.createdAt( role.getCreatedAt() );
+        roleResponse.description( role.getDescription() );
+        roleResponse.id( role.getId() );
+        roleResponse.name( role.getName() );
+        roleResponse.permissions( permissionListToPermissionResponseList( role.getPermissions() ) );
+        roleResponse.updatedAt( role.getUpdatedAt() );
+
+        return roleResponse.build();
+    }
+
+    protected List<RoleResponse> roleListToRoleResponseList(List<Role> list) {
+        if ( list == null ) {
+            return null;
+        }
+
+        List<RoleResponse> list1 = new ArrayList<RoleResponse>( list.size() );
+        for ( Role role : list ) {
+            list1.add( roleToRoleResponse( role ) );
         }
 
         return list1;

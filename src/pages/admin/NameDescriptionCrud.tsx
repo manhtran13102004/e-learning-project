@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react"
-import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react"
+import { ChevronLeft, ChevronRight, Eye, Pencil, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,6 +31,7 @@ interface NameDescriptionItem {
   name: string
   description: string | null
   createdAt: string
+  updatedAt?: string
 }
 
 interface NameDescriptionPayload {
@@ -93,6 +94,8 @@ export function NameDescriptionCrud<
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [totalElements, setTotalElements] = useState(0)
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [viewingItem, setViewingItem] = useState<T | null>(null)
 
   const { sortState, toggleSort } = useSortParams<NameDescriptionSortKey>()
 
@@ -127,6 +130,11 @@ export function NameDescriptionCrud<
     setForm(EMPTY_FORM)
     setExtraForm(getExtraFormValue ? getExtraFormValue(null) : ({} as TExtra))
     setIsDialogOpen(true)
+  }
+
+  function openViewDialog(item: T) {
+    setViewingItem(item)
+    setIsViewDialogOpen(true)
   }
 
   function openEditDialog(item: T) {
@@ -238,6 +246,14 @@ export function NameDescriptionCrud<
                 {extraColumnHeader && <TableCell>{renderExtraColumn?.(item)}</TableCell>}
                 <TableCell>{new Date(item.createdAt).toLocaleDateString("vi-VN")}</TableCell>
                 <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => openViewDialog(item)}
+                    aria-label={`Xem chi tiết ${item.name}`}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
                   {update && (
                     <Button
                       variant="ghost"
@@ -287,6 +303,70 @@ export function NameDescriptionCrud<
           </Button>
         </div>
       </div>
+
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Chi tiết {viewingItem?.name ?? ""}</DialogTitle>
+          </DialogHeader>
+          {viewingItem && (
+            <div className="space-y-5">
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">{viewingItem.name}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {viewingItem.description || "Không có mô tả"}
+                </p>
+              </div>
+
+              {extraColumnHeader && (
+                <div className="grid gap-1">
+                  <Label className="text-xs text-muted-foreground">{extraColumnHeader}</Label>
+                  <div>{renderExtraColumn?.(viewingItem)}</div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4 rounded-md border p-4 text-sm">
+                <div>
+                  <div className="text-xs text-muted-foreground">ID</div>
+                  <div className="font-medium">{viewingItem.id}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Ngày tạo</div>
+                  <div className="font-medium">
+                    {new Date(viewingItem.createdAt).toLocaleDateString("vi-VN")}
+                  </div>
+                </div>
+                {viewingItem.updatedAt && (
+                  <div>
+                    <div className="text-xs text-muted-foreground">Cập nhật gần nhất</div>
+                    <div className="font-medium">
+                      {new Date(viewingItem.updatedAt).toLocaleDateString("vi-VN")}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            {update && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsViewDialogOpen(false)
+                  if (viewingItem) openEditDialog(viewingItem)
+                }}
+              >
+                <Pencil className="mr-2 h-4 w-4" />
+                Sửa
+              </Button>
+            )}
+            <Button type="button" onClick={() => setIsViewDialogOpen(false)}>
+              Đóng
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>

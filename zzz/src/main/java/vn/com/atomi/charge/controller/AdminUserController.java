@@ -17,13 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import vn.com.atomi.charge.dto.request.AddRoleToUserRequest;
-import vn.com.atomi.charge.dto.request.CreateUserRequest;
-import vn.com.atomi.charge.dto.request.DeleteRoleFromUserRequest;
+import vn.com.atomi.charge.dto.request.AdminCreateUserRequest;
+import vn.com.atomi.charge.dto.request.AdminDeleteRoleFromUserRequest;
 import vn.com.atomi.charge.dto.request.UpdateUserRequest;
-import vn.com.atomi.charge.dto.request.UserSearchRequest;
+import vn.com.atomi.charge.dto.request.AdminUserSearchRequest;
 import vn.com.atomi.charge.dto.response.AdminUserResponse;
 import vn.com.atomi.charge.dto.response.BaseResponse;
-import vn.com.atomi.charge.entity.Role;
 import vn.com.atomi.charge.service.UserService;
 
 
@@ -62,10 +61,10 @@ public class AdminUserController {
 
     @GetMapping("/search")
     public ResponseEntity<BaseResponse<Page<AdminUserResponse>>> search(
-        @ModelAttribute UserSearchRequest request,
+        @ModelAttribute @Valid AdminUserSearchRequest request,
         Pageable pageable
     ){
-        Page<AdminUserResponse> usersPage = userService.search(request, pageable);
+        Page<AdminUserResponse> usersPage = userService.searchForAdmin(request, pageable);
         BaseResponse<Page<AdminUserResponse>> response = BaseResponse.<Page<AdminUserResponse>>builder()
                 .code(200)
                 .message("OK")
@@ -96,11 +95,8 @@ public class AdminUserController {
     
     
     @PostMapping
-    public ResponseEntity<BaseResponse<AdminUserResponse>>createUser(@Valid @RequestBody CreateUserRequest request){
+    public ResponseEntity<BaseResponse<AdminUserResponse>>createUser(@Valid @RequestBody AdminCreateUserRequest request){
 
-        if (request.getRoles() == null || request.getRoles().isEmpty()) {
-            request.setRoles(List.of(Role.builder().name("LEARNER").build()));
-        }
         AdminUserResponse userResponse = userService.create(request);
         BaseResponse<AdminUserResponse> response = BaseResponse.<AdminUserResponse>builder()
                 .code(201)
@@ -152,7 +148,7 @@ public class AdminUserController {
 
     @PostMapping("{id}/roles")
     public ResponseEntity<BaseResponse<AdminUserResponse>> addRole(@PathVariable Long id,
-                                                                       @RequestBody AddRoleToUserRequest request) {
+                                                                       @Valid @RequestBody AddRoleToUserRequest request) {
         BaseResponse<AdminUserResponse> response = BaseResponse.<AdminUserResponse>builder()
                 .code(200)
                 .message("Cập nhật role thành công")
@@ -164,7 +160,7 @@ public class AdminUserController {
 
     @DeleteMapping("{id}/roles")
     public ResponseEntity<BaseResponse<AdminUserResponse>> deleteRole(@PathVariable Long id,
-                                                                        @RequestBody DeleteRoleFromUserRequest request) {
+                                                                        @Valid @RequestBody AdminDeleteRoleFromUserRequest request) {
 
          BaseResponse<AdminUserResponse> response = BaseResponse.<AdminUserResponse>builder()
             .code(200)

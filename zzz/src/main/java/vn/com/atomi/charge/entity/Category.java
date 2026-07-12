@@ -1,23 +1,13 @@
 package vn.com.atomi.charge.entity;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import vn.com.atomi.charge.enums.ActiveStatus;
 
 @Entity
@@ -42,6 +32,16 @@ public class Category {
     @Column(length = 1000)
     private String description;
 
+    // Liên kết One-to-Many để lấy nhanh các danh mục con trực thuộc (Dùng Set để tối ưu)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<Category> children = new HashSet<>();
+
+    // Danh sách sản phẩm thuộc danh mục này
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<Product> products = new HashSet<>();
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private ActiveStatus status;
@@ -53,4 +53,8 @@ public class Category {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Category parent; // Đệ quy để tạo cây danh mục cha - con
 }

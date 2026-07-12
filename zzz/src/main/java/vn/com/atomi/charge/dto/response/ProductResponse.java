@@ -2,7 +2,6 @@ package vn.com.atomi.charge.dto.response;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import vn.com.atomi.charge.entity.User;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,5 +33,5 @@ public class ProductResponse {
     private LocalDateTime publishedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private User createdBy;
+    private UserResponse createdBy;
 }

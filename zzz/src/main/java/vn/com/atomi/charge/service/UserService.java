@@ -12,7 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import vn.com.atomi.charge.dto.request.CreateUserRequest;
 import vn.com.atomi.charge.dto.request.UpdateUserRequest;
-import vn.com.atomi.charge.dto.request.UserSearchRequest;
+import vn.com.atomi.charge.dto.request.AdminCreateUserRequest;
+import vn.com.atomi.charge.dto.request.AdminUserSearchRequest;
 import vn.com.atomi.charge.dto.response.AdminUserResponse;
 import vn.com.atomi.charge.entity.FileMetadata;
 import vn.com.atomi.charge.entity.Role;
@@ -52,17 +53,17 @@ public class UserService {
 
     public List<AdminUserResponse> getAll() {
         return userRepository.findAll().stream()
-                .map(userMapper::toAdminDto)
+                .map(this::toAdminResponse)
                 .toList();
     }
 
     public Page<AdminUserResponse> getAllWithPagination(Pageable pageable) {
 
         Page<User> users = userRepository.findAll(pageable);
-        return users.map(userMapper::toAdminDto);
+        return users.map(this::toAdminResponse);
     }
 
-    public Page<AdminUserResponse> search(UserSearchRequest request, Pageable pageable) {
+    public Page<AdminUserResponse> searchForAdmin(AdminUserSearchRequest request, Pageable pageable) {
         
         Specification<User> specification = Specification.where(null);
         if (request.getKeyword() != null && !request.getKeyword().isEmpty()) {
@@ -86,25 +87,18 @@ public class UserService {
             specification = specification.and(new GenericSpecification<>("createdAt", "LESS_THAN_OR_EQUAL", request.getToCreatedDate().atTime(23, 59, 59)));
         }
 
-        return userRepository.findAll(specification, pageable).map(userMapper::toAdminDto);
+        return userRepository.findAll(specification, pageable).map(this::toAdminResponse);
     }
 
     
 
     @Transactional
-    public AdminUserResponse create(CreateUserRequest request){
+    public AdminUserResponse create(AdminCreateUserRequest request){
 
         if(userRepository.existsByEmail(request.getEmail()))
             throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
 
-        User user = User.builder()
-                .email(request.getEmail())
-                .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .fullName(request.getFullName())
-                .avatarFile(resolveAvatarFile(request.getAvatarFileId()))
-                .bio(request.getBio())
-                .roles(request.getRoles())
-                .build();
+        User user = userMapper.toEntity(request);
 
         userRepository.save(user);
 
@@ -116,9 +110,7 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        user.setFullName(request.getFullName());
-        user.setAvatarFile(resolveAvatarFile(request.getAvatarFileId()));
-        user.setBio(request.getBio());
+        userMapper.updateEntityFromRequest(request, user);
 
         if (request.getPassword() != null && !request.getPassword().isEmpty()) {
             user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
@@ -141,6 +133,7 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
+    @Transactional
     public FileMetadata updateAvatarFile(Long userId, MultipartFile multipartFile){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));

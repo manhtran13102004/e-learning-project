@@ -16,7 +16,7 @@ export interface AdminUser {
   email: string;
   fullName: string;
   avatarFileId: number | null;
-  avatarFileUrl: string | null;
+  avatarUrl: string | null;
   bio: string | null;
   userStatus: UserStatus | null;
   roles: UserRoleRef[] | null;
@@ -69,6 +69,20 @@ export interface UploadedFile {
 export type CourseLevel = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
 export type CourseContentStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 export type DurationUnit = 'HOUR' | 'DAY' | 'WEEK' | 'MONTH' | 'YEAR';
+export type ProductActiveStatus = 'ACTIVE' | 'INACTIVE';
+
+export interface CourseFilters {
+  keyword?: string;
+  sku?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  status?: ProductActiveStatus;
+  level?: CourseLevel;
+  contentStatus?: CourseContentStatus;
+  certificateEnabled?: boolean;
+  estimatedDurationUnit?: DurationUnit;
+  estimatedDurationValue?: number;
+}
 
 export interface AdminCourse {
   id: number;
@@ -76,10 +90,15 @@ export interface AdminCourse {
   shortDescription: string | null;
   description: string | null;
   slug: string;
+  sku: string | null;
   price: number;
   currency: string | null;
   thumbnailFileId: number | null;
   thumbnailFileUrl: string | null;
+  averageRating: number | null;
+  ratingCount: number | null;
+  status: ProductActiveStatus;
+  publishedAt: string | null;
   level: CourseLevel;
   contentStatus: CourseContentStatus;
   estimatedDurationUnit: DurationUnit | null;
@@ -176,11 +195,7 @@ export const adminService = {
   },
 
   async createUser(payload: CreateUserPayload): Promise<AdminUser> {
-    const { roleIds, ...rest } = payload;
-    const res = await apiClient.post<BaseResponse<AdminUser>>('/admin/users', {
-      ...rest,
-      roles: (roleIds ?? []).map((id) => ({ id })),
-    });
+    const res = await apiClient.post<BaseResponse<AdminUser>>('/admin/users', payload);
     return res.result;
   },
 
@@ -229,6 +244,37 @@ export const adminService = {
     appendSort(params, sort);
     const res = await apiClient.get<BaseResponse<PageResponse<AdminCourse>>>(
       `/admin/courses/page?${params.toString()}`
+    );
+    return res.result;
+  },
+
+  async searchCourses(
+    page: number,
+    size: number,
+    filters?: CourseFilters,
+    sort?: SortParam
+  ): Promise<PageResponse<AdminCourse>> {
+    const params = new URLSearchParams();
+    params.set('page', String(page));
+    params.set('size', String(size));
+    if (filters?.keyword) params.set('keyword', filters.keyword);
+    if (filters?.sku) params.set('sku', filters.sku);
+    if (filters?.minPrice != null) params.set('minPrice', String(filters.minPrice));
+    if (filters?.maxPrice != null) params.set('maxPrice', String(filters.maxPrice));
+    if (filters?.status) params.set('status', filters.status);
+    if (filters?.level) params.set('level', filters.level);
+    if (filters?.contentStatus) params.set('contentStatus', filters.contentStatus);
+    if (filters?.certificateEnabled != null) {
+      params.set('certificateEnabled', String(filters.certificateEnabled));
+    }
+    if (filters?.estimatedDurationUnit) params.set('estimatedDurationUnit', filters.estimatedDurationUnit);
+    if (filters?.estimatedDurationValue != null) {
+      params.set('estimatedDurationValue', String(filters.estimatedDurationValue));
+    }
+    appendSort(params, sort);
+
+    const res = await apiClient.get<BaseResponse<PageResponse<AdminCourse>>>(
+      `/admin/courses/search?${params.toString()}`
     );
     return res.result;
   },

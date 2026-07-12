@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -20,6 +21,8 @@ import vn.com.atomi.charge.dto.request.UpdateCourseRequest;
 import vn.com.atomi.charge.dto.response.BaseResponse;
 import vn.com.atomi.charge.dto.response.CourseResponse;
 import vn.com.atomi.charge.service.CourseService;
+import vn.com.atomi.charge.dto.request.AdminCourseSearchRequest;
+import vn.com.atomi.charge.dto.response.AdminCourseResponse;
 
 @RestController
 @RequestMapping("api/admin/courses")
@@ -50,6 +53,19 @@ public class AdminCourseController {
                 .build();
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<BaseResponse<Page<AdminCourseResponse>>> search(
+        @ModelAttribute @Valid AdminCourseSearchRequest request, 
+        Pageable pageable
+        ) {
+            BaseResponse<Page<AdminCourseResponse>> response = BaseResponse.<Page<AdminCourseResponse>>builder()
+                    .code(200)
+                    .message("OK")
+                    .result(CourseService.searchForAdmin(request, pageable))
+                    .build();
+            return ResponseEntity.ok(response);
+        }
 
     @PostMapping
     public ResponseEntity<BaseResponse<CourseResponse>> createCourse(@Valid @RequestBody CreateCourseRequest request) {

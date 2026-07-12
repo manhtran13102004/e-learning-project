@@ -58,6 +58,7 @@ short_description
 Description
 slug
 sku
+category_id (FK)
 Price
 thumbnail_file_id (FK nullable)
 Currency
@@ -132,12 +133,10 @@ name
 slug
 description
 status (ACTIVE, INACTIVE)
+parent
 created_at
 updated_at 
 
-ProductCategory
-product_id
-category_id
 
 
 3. Course Content 
@@ -288,13 +287,29 @@ created_at
 
 Certificate (Chứng chỉ):
 id
-user_id (FK)
 product_id (FK)
-verification_url 
-certificate_code (Mã định danh duy nhất để xác thực)
-pdf_file_id (FK)
-Status (Valid, Revoked)
+title
+description
+back_ground_file_id
+status (Active, Inactive)
+created_at
+updated_at
+
+UserCertificate
+id
+user_id
+certificate_id
+certificate_code UNIQUE (Mã định danh duy nhất để xác thực)
+Pdf_file_id
+status (Valid, Revoked)
 issued_at
+revoked_at (nullable)
+revoked_reason (nullable)
+created_at
+updated_at
+UNIQUE(user_id, certificate_id)
+
+
 
 5. Learning Progress 
 Enrollment (Đăng ký): Bản ghi nối giữa Người dùng và các sản phẩm.
@@ -329,15 +344,17 @@ Composite PK (user_id, video_content_id)
 
 
 6. Certificate & Skills 
+
 Certificate (Chứng chỉ):
 id
-user_id (FK)
 product_id (FK)
-verification_url 
-certificate_code (Mã định danh duy nhất để xác thực)
+title
+description
+back_ground_file_id
 Pdf_file_id
-Status (Valid, Revoked)
-Issued_at
+status (Active, Inactive)
+created_at
+updated_at
 
 Skill
 id

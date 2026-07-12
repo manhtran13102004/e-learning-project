@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import vn.com.atomi.charge.dto.request.AdminPermissionRequest;
+import jakarta.validation.Valid;
+import vn.com.atomi.charge.dto.request.AdminCreatePermissionRequest;
+import vn.com.atomi.charge.dto.request.AdminUpdatePermissionRequest;
 import vn.com.atomi.charge.dto.response.AdminPermissionResponse;
 import vn.com.atomi.charge.dto.response.BaseResponse;
 import vn.com.atomi.charge.service.PermissionService;
@@ -57,7 +59,7 @@ public class AdminPermissionController {
     // Add new permission
     @PostMapping
     public ResponseEntity<BaseResponse<AdminPermissionResponse>> addPermission(
-            @RequestBody AdminPermissionRequest request) {
+            @RequestBody @Valid AdminCreatePermissionRequest request) {
 
         AdminPermissionResponse permissionResponse = permissionService.addPermission(request);
 
@@ -74,7 +76,7 @@ public class AdminPermissionController {
     @PutMapping("{id}")
     public ResponseEntity<BaseResponse<AdminPermissionResponse>> updatePermission(
             @PathVariable Long id,
-            @RequestBody AdminPermissionRequest request) {
+            @RequestBody @Valid AdminUpdatePermissionRequest request) {
 
         AdminPermissionResponse permissionResponse = permissionService.updatePermission(id, request);
 

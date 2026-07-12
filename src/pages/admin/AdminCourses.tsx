@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react"
-import { Plus, Pencil, Trash2, Eye, ChevronLeft, ChevronRight } from "lucide-react"
+import { Plus, Pencil, Trash2, Eye, ChevronLeft, ChevronRight, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select } from "@/components/ui/select"
@@ -30,10 +31,16 @@ import {
   type CourseLevel,
   type CourseContentStatus,
   type DurationUnit,
+  type ProductActiveStatus,
 } from "@/services/admin-service"
 
 type CourseSortKey = "name" | "price" | "level" | "contentStatus"
+type CertificateFilter = "" | "true" | "false"
 const PAGE_SIZE = 10
+const PRODUCT_STATUSES: ProductActiveStatus[] = ["ACTIVE", "INACTIVE"]
+const LEVELS: CourseLevel[] = ["BEGINNER", "INTERMEDIATE", "ADVANCED"]
+const CONTENT_STATUSES: CourseContentStatus[] = ["DRAFT", "PUBLISHED", "ARCHIVED"]
+const DURATION_UNITS: DurationUnit[] = ["HOUR", "DAY", "WEEK", "MONTH", "YEAR"]
 
 const EMPTY_FORM: CoursePayload = {
   name: "",
@@ -67,7 +74,24 @@ export function AdminCourses() {
   const [totalPages, setTotalPages] = useState(0)
   const [totalElements, setTotalElements] = useState(0)
 
+  const [searchInput, setSearchInput] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [skuFilter, setSkuFilter] = useState("")
+  const [minPriceFilter, setMinPriceFilter] = useState("")
+  const [maxPriceFilter, setMaxPriceFilter] = useState("")
+  const [statusFilter, setStatusFilter] = useState<ProductActiveStatus | "">("")
+  const [levelFilter, setLevelFilter] = useState<CourseLevel | "">("")
+  const [contentStatusFilter, setContentStatusFilter] = useState<CourseContentStatus | "">("")
+  const [certificateFilter, setCertificateFilter] = useState<CertificateFilter>("")
+  const [durationUnitFilter, setDurationUnitFilter] = useState<DurationUnit | "">("")
+  const [durationValueFilter, setDurationValueFilter] = useState("")
+
   const { sortState, toggleSort } = useSortParams<CourseSortKey>()
+
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchQuery(searchInput.trim()), 300)
+    return () => clearTimeout(timer)
+  }, [searchInput])
 
   useEffect(() => {
     if (!thumbnailFile) {
@@ -83,9 +107,21 @@ export function AdminCourses() {
     setLoading(true)
     setError(null)
     adminService
-      .listCoursesPage(
+      .searchCourses(
         page,
         PAGE_SIZE,
+        {
+          keyword: searchQuery || undefined,
+          sku: skuFilter || undefined,
+          minPrice: minPriceFilter ? Number(minPriceFilter) : undefined,
+          maxPrice: maxPriceFilter ? Number(maxPriceFilter) : undefined,
+          status: statusFilter || undefined,
+          level: levelFilter || undefined,
+          contentStatus: contentStatusFilter || undefined,
+          certificateEnabled: certificateFilter ? certificateFilter === "true" : undefined,
+          estimatedDurationUnit: durationUnitFilter || undefined,
+          estimatedDurationValue: durationValueFilter ? Number(durationValueFilter) : undefined,
+        },
         sortState.key ? { field: sortState.key, direction: sortState.direction } : { field: "id", direction: "asc" }
       )
       .then((res) => {
@@ -99,12 +135,53 @@ export function AdminCourses() {
 
   useEffect(() => {
     setPage(0)
-  }, [sortState.key, sortState.direction])
+  }, [
+    sortState.key,
+    sortState.direction,
+    searchQuery,
+    skuFilter,
+    minPriceFilter,
+    maxPriceFilter,
+    statusFilter,
+    levelFilter,
+    contentStatusFilter,
+    certificateFilter,
+    durationUnitFilter,
+    durationValueFilter,
+  ])
 
   useEffect(() => {
     loadCourses()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, sortState.key, sortState.direction])
+  }, [
+    page,
+    sortState.key,
+    sortState.direction,
+    searchQuery,
+    skuFilter,
+    minPriceFilter,
+    maxPriceFilter,
+    statusFilter,
+    levelFilter,
+    contentStatusFilter,
+    certificateFilter,
+    durationUnitFilter,
+    durationValueFilter,
+  ])
+
+  function clearFilters() {
+    setSearchInput("")
+    setSearchQuery("")
+    setSkuFilter("")
+    setMinPriceFilter("")
+    setMaxPriceFilter("")
+    setStatusFilter("")
+    setLevelFilter("")
+    setContentStatusFilter("")
+    setCertificateFilter("")
+    setDurationUnitFilter("")
+    setDurationValueFilter("")
+  }
 
   function openCreateDialog() {
     setEditingId(null)
@@ -185,6 +262,133 @@ export function AdminCourses() {
           <Plus className="mr-2 h-4 w-4" />
           Thêm khóa học
         </Button>
+      </div>
+
+      <div className="flex flex-wrap items-end gap-4">
+        <div className="grid max-w-sm flex-1 gap-1">
+          <Label className="text-xs text-muted-foreground">Tìm kiếm</Label>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              className="pl-9"
+              placeholder="Tìm theo tên, mô tả, slug..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="grid gap-1">
+          <Label className="text-xs text-muted-foreground">SKU</Label>
+          <Input
+            className="w-32"
+            value={skuFilter}
+            onChange={(e) => setSkuFilter(e.target.value)}
+          />
+        </div>
+        <div className="grid gap-1">
+          <Label className="text-xs text-muted-foreground">Level</Label>
+          <Select
+            className="w-40"
+            value={levelFilter}
+            onChange={(e) => setLevelFilter(e.target.value as CourseLevel | "")}
+          >
+            <option value="">Tất cả</option>
+            {LEVELS.map((level) => (
+              <option key={level} value={level}>
+                {level}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div className="grid gap-1">
+          <Label className="text-xs text-muted-foreground">Trạng thái nội dung</Label>
+          <Select
+            className="w-40"
+            value={contentStatusFilter}
+            onChange={(e) => setContentStatusFilter(e.target.value as CourseContentStatus | "")}
+          >
+            <option value="">Tất cả</option>
+            {CONTENT_STATUSES.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div className="grid gap-1">
+          <Label className="text-xs text-muted-foreground">Trạng thái sản phẩm</Label>
+          <Select
+            className="w-40"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as ProductActiveStatus | "")}
+          >
+            <option value="">Tất cả</option>
+            {PRODUCT_STATUSES.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <Button type="button" variant="outline" onClick={clearFilters}>
+          Xóa bộ lọc
+        </Button>
+      </div>
+
+      <div className="flex flex-wrap items-end gap-4">
+        <div className="grid gap-1">
+          <Label className="text-xs text-muted-foreground">Giá từ</Label>
+          <Input
+            className="w-28"
+            type="number"
+            min={0}
+            value={minPriceFilter}
+            onChange={(e) => setMinPriceFilter(e.target.value)}
+          />
+        </div>
+        <div className="grid gap-1">
+          <Label className="text-xs text-muted-foreground">Giá đến</Label>
+          <Input
+            className="w-28"
+            type="number"
+            min={0}
+            value={maxPriceFilter}
+            onChange={(e) => setMaxPriceFilter(e.target.value)}
+          />
+        </div>
+        <div className="grid gap-1">
+          <Label className="text-xs text-muted-foreground">Đơn vị thời lượng</Label>
+          <Select
+            className="w-32"
+            value={durationUnitFilter}
+            onChange={(e) => setDurationUnitFilter(e.target.value as DurationUnit | "")}
+          >
+            <option value="">Tất cả</option>
+            {DURATION_UNITS.map((unit) => (
+              <option key={unit} value={unit}>
+                {unit}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div className="grid gap-1">
+          <Label className="text-xs text-muted-foreground">Giá trị thời lượng</Label>
+          <Input
+            className="w-28"
+            type="number"
+            min={0}
+            value={durationValueFilter}
+            onChange={(e) => setDurationValueFilter(e.target.value)}
+          />
+        </div>
+        <label className="flex items-center gap-2 pb-2 text-sm" htmlFor="certificate-filter">
+          <Checkbox
+            id="certificate-filter"
+            checked={certificateFilter === "true"}
+            onCheckedChange={(checked) => setCertificateFilter(checked ? "true" : "")}
+          />
+          Có chứng chỉ
+        </label>
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
@@ -482,12 +686,18 @@ export function AdminCourses() {
 
               <div className="space-y-1">
                 <h2 className="text-xl font-semibold">{viewingCourse.name}</h2>
-                <p className="text-sm text-muted-foreground">/{viewingCourse.slug}</p>
+                <p className="text-sm text-muted-foreground">
+                  /{viewingCourse.slug}
+                  {viewingCourse.sku && ` · SKU: ${viewingCourse.sku}`}
+                </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={viewingCourse.contentStatus === "PUBLISHED" ? "success" : "secondary"}>
                   {viewingCourse.contentStatus}
+                </Badge>
+                <Badge variant={viewingCourse.status === "ACTIVE" ? "success" : "destructive"}>
+                  {viewingCourse.status}
                 </Badge>
                 <Badge variant="outline">{viewingCourse.level}</Badge>
                 {viewingCourse.certificateEnabled && <Badge variant="outline">Có chứng chỉ</Badge>}
@@ -515,6 +725,21 @@ export function AdminCourses() {
                   <div className="text-xs text-muted-foreground">Thời lượng</div>
                   <div className="font-medium">
                     {viewingCourse.estimatedDurationValue ?? "—"} {viewingCourse.estimatedDurationUnit ?? ""}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Đánh giá</div>
+                  <div className="font-medium">
+                    {viewingCourse.averageRating != null ? viewingCourse.averageRating.toFixed(1) : "—"} ★ (
+                    {viewingCourse.ratingCount ?? 0} lượt)
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Ngày xuất bản</div>
+                  <div className="font-medium">
+                    {viewingCourse.publishedAt
+                      ? new Date(viewingCourse.publishedAt).toLocaleDateString("vi-VN")
+                      : "Chưa xuất bản"}
                   </div>
                 </div>
                 <div>

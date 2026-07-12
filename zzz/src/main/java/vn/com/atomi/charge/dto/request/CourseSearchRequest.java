@@ -1,0 +1,22 @@
+package vn.com.atomi.charge.dto.request;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+import vn.com.atomi.charge.enums.ContentStatus;
+import vn.com.atomi.charge.enums.DurationUnit;
+import vn.com.atomi.charge.enums.Level;
+
+
+
+@NoArgsConstructor
+@SuperBuilder
+@Data
+public class CourseSearchRequest extends ProductSearchRequest{
+    private String keyword;
+    private Level level;
+    private ContentStatus contentStatus;
+    private Boolean certificateEnabled;
+    private DurationUnit estimatedDurationUnit;
+    private Integer estimatedDurationValue;
+}

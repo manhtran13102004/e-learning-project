@@ -17,8 +17,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import vn.com.atomi.charge.dto.request.CreateRoleRequest;
-import vn.com.atomi.charge.dto.request.UpdateRoleRequest;
+import jakarta.validation.Valid;
+import vn.com.atomi.charge.dto.request.AdminCreateRoleRequest;
+import vn.com.atomi.charge.dto.request.AdminUpdateRoleRequest;
 import vn.com.atomi.charge.dto.response.AdminRoleResponse;
 import vn.com.atomi.charge.dto.response.BaseResponse;
 import vn.com.atomi.charge.service.RoleService;
@@ -54,7 +55,7 @@ public class RoleController {
     }
 
     @PostMapping
-    public ResponseEntity<BaseResponse<AdminRoleResponse>> createRole(@RequestBody CreateRoleRequest request) {
+    public ResponseEntity<BaseResponse<AdminRoleResponse>> createRole(@Valid @RequestBody AdminCreateRoleRequest request) {
         BaseResponse<AdminRoleResponse> response = BaseResponse.<AdminRoleResponse>builder()
                 .code(201)
                 .message("Tạo role thành công")
@@ -64,7 +65,7 @@ public class RoleController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<BaseResponse<AdminRoleResponse>> updateRole(@PathVariable Long id, @RequestBody UpdateRoleRequest request) {
+    public ResponseEntity<BaseResponse<AdminRoleResponse>> updateRole(@PathVariable Long id, @Valid @RequestBody AdminUpdateRoleRequest request) {
         BaseResponse<AdminRoleResponse> response = BaseResponse.<AdminRoleResponse>builder()
                 .code(200)
                 .message("Cập nhật role thành công")

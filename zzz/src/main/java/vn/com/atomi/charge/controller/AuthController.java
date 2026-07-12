@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import vn.com.atomi.charge.dto.request.LoginRequest;
 import vn.com.atomi.charge.dto.request.RegisterRequest;
 import vn.com.atomi.charge.dto.response.BaseResponse;
@@ -21,7 +22,7 @@ public class AuthController {
         this.authenticationService = authenticationService;
     }
     @PostMapping("login")
-    public ResponseEntity<BaseResponse<String>> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<BaseResponse<String>> login(@Valid @RequestBody LoginRequest request) {
         BaseResponse<String> resposne = BaseResponse.<String>builder()
             .code(200)
             .message("Login thanh cong")
@@ -31,7 +32,7 @@ public class AuthController {
     }
 
     @PostMapping("register")
-    public ResponseEntity<BaseResponse<String>> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<BaseResponse<String>> register(@Valid @RequestBody RegisterRequest request) {
         BaseResponse<String> response = BaseResponse.<String>builder()
             .code(200)
             .message("Đăng ký thành công")

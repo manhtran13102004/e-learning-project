@@ -1,14 +1,10 @@
 package vn.com.atomi.charge.dto.response;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import vn.com.atomi.charge.dto.response.SpecializationResponse;
 import vn.com.atomi.charge.enums.ContentStatus;
 import vn.com.atomi.charge.enums.DurationUnit;
 import vn.com.atomi.charge.enums.Level;

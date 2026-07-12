@@ -7,7 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
-import vn.com.atomi.charge.dto.request.AdminPermissionRequest;
+import vn.com.atomi.charge.dto.request.AdminCreatePermissionRequest;
+import vn.com.atomi.charge.dto.request.AdminUpdatePermissionRequest;
 import vn.com.atomi.charge.dto.response.AdminPermissionResponse;
 import vn.com.atomi.charge.entity.Permission;
 import vn.com.atomi.charge.exception.AppException;
@@ -32,7 +33,7 @@ public class PermissionService {
         return permissions.map(this::toResponse);
     }
 
-    public AdminPermissionResponse addPermission(AdminPermissionRequest permissionRequest) {
+    public AdminPermissionResponse addPermission(AdminCreatePermissionRequest permissionRequest) {
         Permission permission = Permission.builder()
                 .name(permissionRequest.getName())
                 .description(permissionRequest.getDescription())
@@ -40,7 +41,7 @@ public class PermissionService {
         return toResponse(permissionRepository.save(permission));
     }
 
-    public AdminPermissionResponse updatePermission(Long id, AdminPermissionRequest permissionRequest) {
+    public AdminPermissionResponse updatePermission(Long id, AdminUpdatePermissionRequest permissionRequest) {
         Permission permission = permissionRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND));
         permission.setName(permissionRequest.getName());

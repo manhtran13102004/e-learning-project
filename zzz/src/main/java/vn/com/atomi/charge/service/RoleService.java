@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import vn.com.atomi.charge.dto.request.CreateRoleRequest;
-import vn.com.atomi.charge.dto.request.UpdateRoleRequest;
+import vn.com.atomi.charge.dto.request.AdminCreateRoleRequest;
+import vn.com.atomi.charge.dto.request.AdminUpdateRoleRequest;
 import vn.com.atomi.charge.dto.response.AdminRoleResponse;
 import vn.com.atomi.charge.entity.Permission;
 import vn.com.atomi.charge.entity.Role;
@@ -32,7 +32,7 @@ public class RoleService {
     
 
     @Transactional
-    public AdminRoleResponse createRole(CreateRoleRequest request) {
+    public AdminRoleResponse createRole(AdminCreateRoleRequest request) {
         
         if (roleRepository.existsByName(request.getName())) {
             throw new AppException(ErrorCode.ROLE_ALREADY_EXISTS);
@@ -71,7 +71,7 @@ public class RoleService {
         return roles.map(roleMapper::toAdminDto);
     }
 
-    public AdminRoleResponse updateRole(Long id, UpdateRoleRequest request) {
+    public AdminRoleResponse updateRole(Long id, AdminUpdateRoleRequest request) {
         Role role = roleRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
         role.setName(request.getName());
         role.setDescription(request.getDescription());

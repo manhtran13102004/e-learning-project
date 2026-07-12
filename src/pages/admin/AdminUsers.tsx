@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react"
-import { Ban, ChevronLeft, ChevronRight, Pencil, Plus, Search, ShieldCheck, Trash2, X } from "lucide-react"
+import { Ban, ChevronLeft, ChevronRight, Eye, Pencil, Plus, Search, ShieldCheck, Trash2, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -68,6 +68,8 @@ export function AdminUsers() {
   const [editForm, setEditForm] = useState<UpdateUserPayload>(EMPTY_EDIT_FORM)
   const [editAvatarFile, setEditAvatarFile] = useState<File | null>(null)
   const [editAvatarPreviewUrl, setEditAvatarPreviewUrl] = useState<string | null>(null)
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [viewingUser, setViewingUser] = useState<AdminUser | null>(null)
 
   const { sortState, toggleSort } = useSortParams<UserSortKey>()
 
@@ -194,6 +196,11 @@ export function AdminUsers() {
     } finally {
       setIsSaving(false)
     }
+  }
+
+  function openViewDialog(user: AdminUser) {
+    setViewingUser(user)
+    setIsViewDialogOpen(true)
   }
 
   function openEditDialog(user: AdminUser) {
@@ -396,9 +403,9 @@ export function AdminUsers() {
               return (
                 <TableRow key={user.id}>
                   <TableCell>
-                    {user.avatarFileUrl ? (
+                    {user.avatarUrl ? (
                       <img
-                        src={user.avatarFileUrl}
+                        src={user.avatarUrl}
                         alt={user.fullName}
                         className="h-9 w-9 rounded-full object-cover"
                       />
@@ -459,6 +466,14 @@ export function AdminUsers() {
                     </Select>
                   </TableCell>
                   <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openViewDialog(user)}
+                      aria-label={`Xem chi tiết người dùng ${user.email}`}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -629,6 +644,91 @@ export function AdminUsers() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Chi tiết người dùng</DialogTitle>
+          </DialogHeader>
+          {viewingUser && (
+            <div className="space-y-5">
+              <div className="flex items-center gap-4">
+                {viewingUser.avatarUrl ? (
+                  <img
+                    src={viewingUser.avatarUrl}
+                    alt={viewingUser.fullName}
+                    className="h-16 w-16 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted text-lg font-medium text-muted-foreground">
+                    {viewingUser.fullName.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="space-y-1">
+                  <h2 className="text-lg font-semibold">{viewingUser.fullName}</h2>
+                  <p className="text-sm text-muted-foreground">{viewingUser.email}</p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant={viewingUser.userStatus === "BANNED" ? "destructive" : "success"}>
+                  {viewingUser.userStatus ?? "—"}
+                </Badge>
+              </div>
+
+              {viewingUser.bio && (
+                <div className="grid gap-1">
+                  <Label className="text-xs text-muted-foreground">Bio</Label>
+                  <p className="text-sm whitespace-pre-wrap">{viewingUser.bio}</p>
+                </div>
+              )}
+
+              <div className="grid gap-1">
+                <Label className="text-xs text-muted-foreground">Roles</Label>
+                <div className="flex flex-wrap gap-1">
+                  {(viewingUser.roles ?? []).length === 0 && (
+                    <span className="text-sm text-muted-foreground">—</span>
+                  )}
+                  {(viewingUser.roles ?? []).map((role) => (
+                    <Badge key={role.id} variant="secondary">
+                      {role.name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 rounded-md border p-4 text-sm">
+                <div>
+                  <div className="text-xs text-muted-foreground">ID</div>
+                  <div className="font-medium">{viewingUser.id}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Ngày tạo</div>
+                  <div className="font-medium">
+                    {new Date(viewingUser.createdAt).toLocaleDateString("vi-VN")}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsViewDialogOpen(false)
+                if (viewingUser) openEditDialog(viewingUser)
+              }}
+            >
+              <Pencil className="mr-2 h-4 w-4" />
+              Sửa người dùng
+            </Button>
+            <Button type="button" onClick={() => setIsViewDialogOpen(false)}>
+              Đóng
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -654,9 +754,9 @@ export function AdminUsers() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="editAvatar">Ảnh đại diện</Label>
-              {(editAvatarPreviewUrl ?? editingUser?.avatarFileUrl) && (
+              {(editAvatarPreviewUrl ?? editingUser?.avatarUrl) && (
                 <img
-                  src={editAvatarPreviewUrl ?? editingUser?.avatarFileUrl ?? undefined}
+                  src={editAvatarPreviewUrl ?? editingUser?.avatarUrl ?? undefined}
                   alt="Xem trước ảnh đại diện"
                   className="h-20 w-20 rounded-full object-cover"
                 />

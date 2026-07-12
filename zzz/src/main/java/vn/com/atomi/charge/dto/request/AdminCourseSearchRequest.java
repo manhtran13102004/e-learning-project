@@ -1,12 +1,15 @@
 package vn.com.atomi.charge.dto.request;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import vn.com.atomi.charge.enums.ContentStatus;
 import vn.com.atomi.charge.enums.DurationUnit;
 import vn.com.atomi.charge.enums.Level;
 
 
+
+@NoArgsConstructor
 @SuperBuilder
 @Data
 public class AdminCourseSearchRequest extends AdminProductSearchRequest{

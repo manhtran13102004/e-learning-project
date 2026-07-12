@@ -27,6 +27,8 @@ import vn.com.atomi.charge.repository.CourseRepository;
 import vn.com.atomi.charge.repository.FileMetadataRepository;
 import vn.com.atomi.charge.specification.GenericSpecification;
 import vn.com.atomi.charge.dto.request.AdminCourseSearchRequest;
+import vn.com.atomi.charge.dto.request.AdminUpdateCourseRequest;
+import vn.com.atomi.charge.dto.request.CourseSearchRequest;
 
 import org.springframework.data.jpa.domain.Specification;
 import java.math.BigDecimal;
@@ -67,7 +69,7 @@ public class CourseService {
         return courses.map(courseMapper::toDto);
     }
 
-    public Page<AdminCourseResponse> search(AdminCourseSearchRequest request, Pageable pageable){
+    public Page<CourseResponse> search(CourseSearchRequest request, Pageable pageable){
         
         Specification<Course> spec = Specification.where(null);
         if (request.getKeyword () != null && !request.getKeyword().isEmpty()) {
@@ -103,28 +105,65 @@ public class CourseService {
         if (request.getCertificateEnabled () != null) {
             spec = spec.and(new GenericSpecification<>("certificateEnabled", "EQUAL", request.getCertificateEnabled()));
         }
+        return courseRepository.findAll(spec, pageable).map(courseMapper::toDto);
+         
+    }
+    
+
+    public Page<AdminCourseResponse> searchForAdmin(AdminCourseSearchRequest request, Pageable pageable){
+        
+        Specification<Course> spec = Specification.where(null);
+        if (request.getKeyword () != null && !request.getKeyword().isEmpty()) {
+            spec = spec.or(new GenericSpecification<>("name", "LIKE", request.getKeyword()));
+            spec = spec.or(new GenericSpecification<>("shortDescription", "LIKE", request.getKeyword()));
+            spec = spec.or(new GenericSpecification<>("description", "LIKE", request.getKeyword()));
+            spec = spec.or(new GenericSpecification<>("slug", "LIKE", request.getKeyword()));
+        }
+        if (request.getSku () != null && !request.getSku().isEmpty()) {
+            spec = spec.and(new GenericSpecification<>("sku", "LIKE", request.getSku()));
+        }
+        if (request.getMinPrice () != null && request.getMinPrice().compareTo(BigDecimal.ZERO) > 0) {
+            spec = spec.and(new GenericSpecification<>("price", "GREATER_THAN_OR_EQUAL", request.getMinPrice()));
+        }
+        if (request.getMaxPrice () != null && request.getMaxPrice().compareTo(BigDecimal.ZERO) > 0) {
+            spec = spec.and(new GenericSpecification<>("price", "LESS_THAN_OR_EQUAL", request.getMaxPrice()));
+        }
+        if (request.getStatus () != null) {
+            spec = spec.and(new GenericSpecification<>("status", "EQUAL", request.getStatus()));
+        }
+        if (request.getLevel () != null) {
+            spec = spec.and(new GenericSpecification<>("level", "EQUAL", request.getLevel()));
+        }
+        if (request.getContentStatus () != null) {
+            spec = spec.and(new GenericSpecification<>("contentStatus", "EQUAL", request.getContentStatus()));
+        }
+        if (request.getEstimatedDurationUnit () != null) {
+            spec = spec.and(new GenericSpecification<>("estimatedDurationUnit", "EQUAL", request.getEstimatedDurationUnit()));
+        }
+        if (request.getEstimatedDurationValue () != null) {
+            spec = spec.and(new GenericSpecification<>("estimatedDurationValue", "EQUAL", request.getEstimatedDurationValue()));
+        }
+        if (request.getCertificateEnabled () != null) {
+            spec = spec.and(new GenericSpecification<>("certificateEnabled", "EQUAL", request.getCertificateEnabled()));
+        }
+        return courseRepository.findAll(spec, pageable).map(courseMapper::toAdminDto);
          
     }
 
+    
+    
     @Transactional
     public CourseResponse createCourse(CreateCourseRequest request) {
-        Course course = Course.builder()
-                .name(request.getName())
-                .shortDescription(request.getShortDescription())
-                .description(request.getDescription())
-                .slug(request.getSlug())
-                .price(request.getPrice())
-                .currency(request.getCurrency())
-                .thumbnailFile(resolveThumbnailFile(request.getThumbnailFileId()))
-                .status(ActiveStatus.ACTIVE)
-                .level(request.getLevel())
-                .contentStatus(request.getContentStatus())
-                .estimatedDurationUnit(request.getEstimatedDurationUnit())
-                .estimatedDurationValue(request.getEstimatedDurationValue())
-                .certificateEnabled(request.getCertificateEnabled())
-                .build();
+        Course course = courseMapper.toEntity(request);
 
         return courseMapper.toDto(courseRepository.save(course));
+    }
+
+    @Transactional
+    public AdminCourseResponse createCourseForAdmin(CreateCourseRequest request) {
+        Course course = courseMapper.toEntity(request);
+
+        return courseMapper.toAdminDto(courseRepository.save(course));
     }
 
     @Transactional
@@ -132,20 +171,19 @@ public class CourseService {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND));
 
-        course.setName(request.getName());
-        course.setShortDescription(request.getShortDescription());
-        course.setDescription(request.getDescription());
-        course.setSlug(request.getSlug());
-        course.setPrice(request.getPrice());
-        course.setCurrency(request.getCurrency());
-        course.setThumbnailFile(resolveThumbnailFile(request.getThumbnailFileId()));
-        course.setLevel(request.getLevel());
-        course.setContentStatus(request.getContentStatus());
-        course.setEstimatedDurationUnit(request.getEstimatedDurationUnit());
-        course.setEstimatedDurationValue(request.getEstimatedDurationValue());
-        course.setCertificateEnabled(request.getCertificateEnabled());
+        courseMapper.updateEntityFromRequest(request, course);
 
         return courseMapper.toDto(courseRepository.save(course));
+    }
+
+    @Transactional
+    public AdminCourseResponse updateCourseForAdmin(Long id, AdminUpdateCourseRequest request) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND));
+
+        courseMapper.updateEntityFromAdminRequest(request, course);
+
+        return courseMapper.toAdminDto(courseRepository.save(course));
     }
 
     public void deleteCourse(Long id) {
@@ -155,10 +193,12 @@ public class CourseService {
         courseRepository.deleteById(id);
     }
 
-
-
-
-    //____________________________User__________________________________
+    public void changeStatus(Long id, ActiveStatus status){
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND));
+        course.setStatus(status);
+        courseRepository.save(course);
+    }
 
     public List<CourseMemberResponse> getCourseParticipants(Long courseId) {
         return courseMemberRoleRepository.findByCourseId(courseId)
@@ -177,10 +217,14 @@ public class CourseService {
     }
 
     private CourseResponse toResponse(Course course){
-        return courseMapper.toDto(course);
+        CourseResponse courseResponse = courseMapper.toDto(course);
+        courseResponse.setThumbnailFileUrl(course.getThumbnailFile() != null && course.getThumbnailFile().getFileUrl() != null ? course.getThumbnailFile().getFileUrl() : "");
+        return courseResponse;
     }
 
     private AdminCourseResponse toAdminResponse(Course course) {
-        return courseMapper.toAdminDto(course);
+        AdminCourseResponse courseResponse = courseMapper.toAdminDto(course);
+        courseResponse.setThumbnailFileUrl(course.getThumbnailFile() != null && course.getThumbnailFile().getFileUrl() != null ? course.getThumbnailFile().getFileUrl() : "");
+        return courseResponse;
     }
 }
