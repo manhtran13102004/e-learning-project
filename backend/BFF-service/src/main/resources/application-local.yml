@@ -1,0 +1,32 @@
+server:
+  prefix: "bff-service"
+
+spring:
+  cloud:
+    consul:
+      host: ${CONSUL_HOST}
+      port: ${CONSUL_PORT}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
+management:
+  health:
+    redis:
+      enabled: false
+
+config:
+  api:
+    whiteList:
+      - /api/**
+      - /send/**
+  # TODO: thay bằng Inbox riêng của bạn tại mailtrap.io -> Email Testing -> Inboxes -> SMTP Settings
+  mail:
+    host: ${MAILTRAP_HOST}
+    port: ${MAILTRAP_PORT}
+    username: ${MAILTRAP_USERNAME}
+    password: ${MAILTRAP_PASSWORD}
+
+springdoc:
+  paths-to-match: /**

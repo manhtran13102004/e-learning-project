@@ -1,0 +1,70 @@
+server:
+  http2:
+    enabled: true
+  port: 8081
+  servlet:
+    context-path: /
+  shutdown: graceful
+
+management:
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "info,health,prometheus,metrics"
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+# Định nghĩa tên ứng dụng nhất quán
+config:
+  service-name: admin-bff-service
+  api:
+    authn-service: http://authentication-service # Tên service đăng ký trên Consul
+    authz-service: http://authorization-service
+
+spring:
+  profiles:
+    active: local
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  application:
+    name: ${config.service-name}
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      config:
+        enabled: false
+      discovery:
+        enabled: true
+        instance-id: ${config.service-name}:${server.port}
+        service-name: ${config.service-name}
+        health-check-path: /actuator/health
+        prefer-ip-address: true
+        prefer-agent-address: false
+        health-check-interval: 10s
+        health-check-critical-timeout: 90s
+        register: true
+        deregister: true
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 5000   # Thời gian tối đa để thiết lập kết nối (5 giây)
+            read-timeout: 10000     # Thời gian tối đa chờ phản hồi từ microservice con (10 giây)
+            logger-level: basic
+  main:
+    allow-bean-definition-overriding: true
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  show-actuator: false
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true

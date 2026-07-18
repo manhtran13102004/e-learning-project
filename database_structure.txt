@@ -20,11 +20,7 @@ updated_at
 
 Permission:
 id (PK)
-name (Ví dụ: course:create
-course:edit
-course:delete
-quiz:grade
-revenue:view)
+name (Ví dụ: course:create, course:edit, course:delete, quiz:grade, revenue:view)
 description
 
 Role_Permission:
@@ -163,13 +159,14 @@ section_id (FK)
 title
 estimated_duration_minutes 
 type (enum: Video, Reading, Quiz, ASSIGNMENT )
-display_order,status (enum: Draft, Published, Hidden)
+display_order
+status (enum: Draft, Published, Hidden)
 Is_preview
 created_at
 updated_at
 
 Video_Content (Chi tiết bài học Video):
-lesson_id (FK)
+lesson_id (PK, FK)
 video_file_id (FK)
 duration_seconds (Thời lượng)
 subtitle_file_id (FK)
@@ -178,14 +175,13 @@ created_at
 Updated_at
 
 Reading_Content (Chi tiết bài học Đọc):
-id
-lesson_id (FK)
+lesson_id (PK, FK)
 content (Markdown)
 
 
 Quiz (Bài trắc nghiệm):
 id
-lesson_id (FK)
+lesson_id (PK, FK)
 description
 passing_score
 time_limit_minutes
@@ -197,8 +193,7 @@ created_at
 updated_at 
 
 Assignment
-id
-lesson_id (FK)
+lesson_id (PK, FK)
 description
 instruction
 max_score

@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Maven build output
+target/
+
+# Backend secrets (real SMTP/DB credentials for local dev)
+backend/.env
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -1,0 +1,123 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "UserServiceApplication",
+            "request": "launch",
+            "mainClass": "vn.com.atomi.charge.user.UserServiceApplication",
+            "projectName": "user-service",
+            "envFile": "${workspaceFolder}/user-service/.env"
+        },
+        {
+            "type": "java",
+            "name": "AuthenticationServiceApplication",
+            "request": "launch",
+            "mainClass": "vn.com.atomi.charge.authn.AuthenticationServiceApplication",
+            "projectName": "authn-service",
+            "envFile": "${workspaceFolder}/authn-service/.env"
+        },
+        {
+            "type": "java",
+            "name": "AuthorizationServiceApplication",
+            "request": "launch",
+            "mainClass": "vn.com.atomi.charge.authorization.AuthorizationServiceApplication",
+            "projectName": "author-service",
+            "envFile": "${workspaceFolder}/author-service/.env"
+        },
+        {
+            "type": "java",
+            "name": "ApiGatewayApplication",
+            "request": "launch",
+            "mainClass": "vn.com.atomi.charge.gateway.ApiGatewayApplication",
+            "projectName": "api-gateway",
+            "envFile": "${workspaceFolder}/api-gateway/.env"
+        },
+        {
+            "type": "java",
+            "name": "Service2Application",
+            "request": "launch",
+            "mainClass": "vn.com.atomi.charge.service2.Service2Application",
+            "projectName": "service2",
+            "envFile": "${workspaceFolder}/service2/.env"
+        },
+        {
+            "type": "java",
+            "name": "Service1Application",
+            "request": "launch",
+            "mainClass": "vn.com.atomi.charge.service1.Service1Application",
+            "projectName": "service1",
+            "envFile": "${workspaceFolder}/service1/.env"
+            
+        },
+        {
+            "name": "PowerShell: Launch Current File",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "${file}",
+            "args": []
+        },
+        {
+            "type": "java",
+            "name": "Attach: authn-service (5001)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5001
+        },
+        {
+            "type": "java",
+            "name": "Attach: author-service (5002)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5002
+        },
+        {
+            "type": "java",
+            "name": "Attach: user-service (5003)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5003
+        },
+        {
+            "type": "java",
+            "name": "Attach: service1 (5004)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5004
+        },
+        {
+            "type": "java",
+            "name": "Attach: api-gateway (5005)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5005
+        },
+        {
+            "type": "java",
+            "name": "Attach: service2 (5006)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5006
+        }
+        
+    ],
+    "compounds": [
+        {
+            "name": "Attach: service1 + service2 (test pair)",
+            "configurations": ["Attach: service1 (5004)", "Attach: service2 (5006)"]
+        },
+        {
+            "name": "Attach: full system (5 core services)",
+            "configurations": [
+                "Attach: authn-service (5001)",
+                "Attach: author-service (5002)",
+                "Attach: user-service (5003)",
+                "Attach: service1 (5004)",
+                "Attach: api-gateway (5005)"
+            ]
+        }
+    ]
+}

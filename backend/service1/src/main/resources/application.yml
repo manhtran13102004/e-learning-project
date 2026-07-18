@@ -1,0 +1,51 @@
+server:
+  http2:
+    enabled: true
+  port: 8094
+  servlet:
+    context-path: /
+  shutdown: graceful
+  prefix: "service1"
+
+spring:
+  application:
+    name: ${config.service-name}
+  profiles:
+    active: @active.mode@
+    include:
+      - @profile.include@
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  cloud:
+    consul:
+      host: ${CONSUL_HOST}
+      port: ${CONSUL_PORT}
+      enabled: true
+      config:
+        enabled: false
+      discovery:
+        enabled: true
+        instance-id: ${config.service-name}
+        service-name: ${config.service-name}
+        health-check-path: /actuator/health
+        prefer-ip-address: true
+        prefer-agent-address: false
+        health-check-interval: 25s
+        health-check-critical-timeout: 90s
+        register: true
+        deregister: true
+
+config:
+  service-name: service1-service
+  api:
+    version: v1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "info,health,prometheus,metrics"
+  prometheus:
+    metrics:
+      export:
+        enabled: true

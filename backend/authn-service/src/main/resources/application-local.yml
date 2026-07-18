@@ -1,0 +1,46 @@
+server:
+  port: 8081
+  prefix: "authn"
+
+spring:
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: ${config.service-name}
+        enabled: true
+      enabled: true
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/authn_db
+    username: postgres
+    password: "1"
+  jpa:
+    hibernate:
+      ddl-auto: update
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+config:
+  service-name: authentication-service
+  api:
+    version: v1
+    whiteList:
+      - /api/**
+      - /callback/**
+  mail:
+    host: smtp.mailtrap.io
+    port: 2525
+    username: a60470d646c7fc
+    password: d283d18b78a16e
+
+management:
+  health:
+    redis:
+      enabled: false
+
+springdoc:
+  paths-to-match: /**
