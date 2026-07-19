@@ -11,38 +11,42 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import java.util.List;
+import java.util.UUID;
 
 @FeignClient(
     name = "authorization-service",
     configuration = FeignClientConfig.class
 )
-public interface AuthorizationClient {
+public interface AuthorizationClient{
 
     //permissions
     @GetMapping("/api/v1/internal/roles")
-    ResponseEntity<Page<RoleDto>> getAllRoles();
+    ResponseEntity<BaseResponse<Page<RoleDto>>> getAllRoles();
 
     @PostMapping("/api/v1/internal/roles")
-    ResponseEntity<RoleDto>createRole(@RequestBody BaseRequest<RoleDto>roleDto);
+    ResponseEntity<BaseResponse<RoleDto>>createRole(@RequestBody BaseRequest<RoleDto>roleDto);
 
     @PutMapping("/api/v1/internal/roles/{id}")
-    ResponseEntity<RoleDto>updateRole(@PathVariable("id") String id, @RequestBody BaseRequest<RoleDto>roleDto);
+    ResponseEntity<BaseResponse<RoleDto>>updateRole(@PathVariable("id") UUID id, @RequestBody BaseRequest<RoleDto>roleDto);
 
     @DeleteMapping("/api/v1/internal/roles/{id}")
-    BaseResponse<Void> deleteRole(@PathVariable("id") String id);
+    ResponseEntity<BaseResponse<Void>> deleteRole(@PathVariable("id") UUID id);
 
     //PERMISSIONS
     @GetMapping("/api/v1/internal/permissions")
-    ResponseEntity<Page<PermissionDto>> getAllpermissions();
+    ResponseEntity<BaseResponse<Page<PermissionDto>>> getAllpermissions();
 
     @PostMapping("/api/v1/internal/permissions")
-    ResponseEntity<PermissionDto>createpermission(@RequestBody BaseRequest<PermissionDto>permissionDto);
+    ResponseEntity<BaseResponse<PermissionDto>>createPermission(@RequestBody BaseRequest<PermissionDto>permissionDto);
 
     @PutMapping("/api/v1/internal/permissions/{id}")
-    ResponseEntity<PermissionDto>updatepermission(@PathVariable("id") String id, @RequestBody BaseRequest<PermissionDto>permissionDto);
+    ResponseEntity<BaseResponse<PermissionDto>>updatePermission(@PathVariable("id") UUID id, @RequestBody BaseRequest<PermissionDto>permissionDto);
 
     @DeleteMapping("/api/v1/internal/permissions/{id}")
-    BaseResponse<Void> deletepermission(@PathVariable("id") String id);
+    ResponseEntity<BaseResponse<Void>> deletePermission(@PathVariable("id") UUID id);
+
+    @DeleteMapping("/api/v1/internal/permissions")
+    ResponseEntity<BaseResponse<Void>> deletePermissions(@RequestBody List<UUID> ids);
 
 
 }

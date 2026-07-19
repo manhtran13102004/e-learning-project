@@ -5,11 +5,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import vn.com.atomi.charge.base.controller.BaseController;
 import vn.com.atomi.charge.authorization.model.dto.UserDto;
-import vn.com.atomi.charge.authorization.model.entity.UserEntity;
 import vn.com.atomi.charge.authorization.service.interfaces.UserService;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/internal/authoizations")
-public class UserController extends BaseController<UserService, UserDto> {
+public class UserController extends BaseController<UserService, UserDto, UUID> {
 
 }

@@ -2,9 +2,12 @@ package vn.com.atomi.charge.base.util;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Service
+@ConditionalOnProperty(name = "atomi.sequence.enabled", havingValue = "true")
 public class SequenceService {
     @PersistenceContext
     private EntityManager em;

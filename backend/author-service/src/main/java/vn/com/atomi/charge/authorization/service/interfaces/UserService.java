@@ -8,5 +8,5 @@ import vn.com.atomi.charge.authorization.model.entity.UserEntity;
 import vn.com.atomi.charge.authorization.repository.UserRepo;
 import vn.com.atomi.charge.base.service.IBaseService;
 
-public interface UserService extends IBaseService<UserRepo, UserDto, UserEntity, UserMapper> {
+public interface UserService extends IBaseService<UserRepo, UserDto, UserEntity, UserMapper, UUID> {
 }

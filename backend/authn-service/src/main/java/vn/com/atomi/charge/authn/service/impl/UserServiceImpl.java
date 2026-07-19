@@ -8,10 +8,11 @@ import vn.com.atomi.charge.authn.service.interfaces.UserService;
 import vn.com.atomi.charge.authn.model.entity.UserEntity;
 import vn.com.atomi.charge.base.model.request.BaseRequest;
 import vn.com.atomi.charge.base.service.BaseService;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl
-        extends BaseService<UserRepo, UserDto, UserEntity, UserMapper>
+        extends BaseService<UserRepo, UserDto, UserEntity, UserMapper, UUID>
         implements UserService {
 
     @Override

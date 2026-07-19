@@ -6,9 +6,10 @@ import org.springframework.web.bind.annotation.RestController;
 import vn.com.atomi.charge.authn.service.interfaces.UserService;
 import vn.com.atomi.charge.base.controller.BaseController;
 import vn.com.atomi.charge.authn.model.dto.UserDto;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/internal/credentials")
-public class UserController extends BaseController<UserService, UserDto> {
+public class UserController extends BaseController<UserService, UserDto, UUID> {
 
 }

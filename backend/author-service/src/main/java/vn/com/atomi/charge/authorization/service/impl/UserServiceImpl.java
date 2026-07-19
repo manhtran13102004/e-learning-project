@@ -12,6 +12,6 @@ import vn.com.atomi.charge.authorization.service.interfaces.UserService;
 import vn.com.atomi.charge.base.service.BaseService;
 
 @Service
-public class UserServiceImpl extends BaseService<UserRepo, UserDto, UserEntity, UserMapper> implements UserService {
+public class UserServiceImpl extends BaseService<UserRepo, UserDto, UserEntity, UserMapper, UUID> implements UserService {
 
 }

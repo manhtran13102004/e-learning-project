@@ -20,7 +20,8 @@ public class ConstantKey {
             "/swagger-resources/**",
             "/webjars/**",
             "/public/**",
-            "/internal/**"
+            "/internal/**",
+            "/api/v1/**"
     );
 
     public static final String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_])(?!.*\\s).{8,}$";

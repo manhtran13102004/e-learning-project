@@ -9,7 +9,9 @@ import vn.com.atomi.charge.user.repository.UserRepo;
 import vn.com.atomi.charge.user.mapper.UserMapper;
 import vn.com.atomi.charge.user.service.interfaces.UserService;
 
+import java.util.UUID;
+
 @Service
-public class UserServiceImpl extends BaseService<UserRepo, UserDto, UserEntity, UserMapper> implements UserService {
+public class UserServiceImpl extends BaseService<UserRepo, UserDto, UserEntity, UserMapper, UUID> implements UserService {
 
 }

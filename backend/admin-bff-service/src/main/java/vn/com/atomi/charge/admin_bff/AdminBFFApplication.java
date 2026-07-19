@@ -16,7 +16,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         HibernateJpaAutoConfiguration.class
 })
 @EnableDiscoveryClient
-@EnableFeignClients(basePackages = "vn.com.atomi.charge.bff.client")
+@EnableFeignClients(basePackages = "vn.com.atomi.charge.admin_bff.client")
 @EnableScheduling
 @ComponentScan({"vn.com.atomi.charge"})
 public class AdminBFFApplication {

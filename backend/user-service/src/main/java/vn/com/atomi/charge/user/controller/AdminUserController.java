@@ -11,6 +11,6 @@ import vn.com.atomi.charge.user.service.interfaces.AdminUserService;
 
 @RestController
 @RequestMapping("/api/v1/admin/users")
-public class AdminUserController extends BaseController<AdminUserService, AdminUserDto> {
+public class AdminUserController extends BaseController<AdminUserService, AdminUserDto, UUID> {
 
 }

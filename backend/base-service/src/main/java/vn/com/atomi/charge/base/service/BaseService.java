@@ -21,6 +21,7 @@ import vn.com.atomi.charge.base.model.entity.BaseEntity;
 import vn.com.atomi.charge.base.repository.BaseRepository;
 import vn.com.atomi.charge.base.repository.BaseSpecification;
 import vn.com.atomi.charge.base.util.StringUtil;
+import java.io.Serializable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,8 +29,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public abstract class BaseService
-  <R extends BaseRepository, D extends BaseDto, E extends BaseEntity, M extends EntityMapper>
-    implements IBaseService<R, D, E, M> {
+  <R extends BaseRepository, D extends BaseDto, E extends BaseEntity, M extends EntityMapper, ID extends Serializable>
+    implements IBaseService<R, D, E, M, ID> {
 
   @Autowired
   protected R repository;
@@ -126,7 +127,7 @@ public abstract class BaseService
   }
 
   @Override
-  public BaseResponse<D> getDetails(String id) {
+  public BaseResponse<D> getDetails(ID id) {
     response = new BaseResponse<>();
     try {
       getRequest();
@@ -152,7 +153,7 @@ public abstract class BaseService
 
   @Override
   @Transactional(rollbackFor = Exception.class)
-  public BaseResponse<D> delete(String id) {
+  public BaseResponse<D> delete(ID id) {
     response = new BaseResponse<>();
     try {
       getRequest();
@@ -172,7 +173,7 @@ public abstract class BaseService
 
   @Override
   @Transactional(rollbackFor = Exception.class)
-  public BaseResponse<D> delete(List<String> ids) {
+  public BaseResponse<D> delete(List<ID> ids) {
     response = new BaseResponse<>();
     try {
       int result = repository.softDelete(ids, LocalDateTime.now(), LocalDateTime.now());

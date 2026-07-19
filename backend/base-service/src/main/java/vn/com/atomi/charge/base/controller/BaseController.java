@@ -12,11 +12,12 @@ import vn.com.atomi.charge.base.model.request.BaseRequest;
 import vn.com.atomi.charge.base.model.response.BaseResponse;
 import vn.com.atomi.charge.base.service.IBaseService;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 @Validated
-public abstract class BaseController<S extends IBaseService<?, D, ?, ?>, D extends BaseDto> {
+public abstract class BaseController<S extends IBaseService<?, D, ?, ?, ID>, D extends BaseDto<ID>, ID extends Serializable> {
 
   @Autowired
   protected S service;
@@ -28,7 +29,7 @@ public abstract class BaseController<S extends IBaseService<?, D, ?, ?>, D exten
   }
 
   @GetMapping(value = {"/{id}"})
-  public ResponseEntity<?> getDetails(@PathVariable("id") String id) {
+  public ResponseEntity<?> getDetails(@PathVariable("id") ID id) {
     BaseResponse<D> dto = service.getDetails(id);
     return ResponseEntity.ok(dto);
   }
@@ -42,18 +43,18 @@ public abstract class BaseController<S extends IBaseService<?, D, ?, ?>, D exten
   @Validated(BaseDto.Update.class)
   @PostMapping(value = {"/{id}"})
   public ResponseEntity<?> update(@RequestBody @Valid BaseRequest<D> dto,
-                                  @PathVariable String id) {
+                                  @PathVariable ID id) {
     dto.getData().setId(id);
     return ResponseEntity.ok(service.update(dto));
   }
 
   @DeleteMapping(value = {"/{id}"})
-  public ResponseEntity<?> delete(@PathVariable String id) {
+  public ResponseEntity<?> delete(@PathVariable ID id) {
     return ResponseEntity.ok(service.delete(id));
   }
 
   @DeleteMapping
-  public ResponseEntity<?> deleteMany(@RequestBody List<String> ids) {
+  public ResponseEntity<?> deleteMany(@RequestBody List<ID> ids) {
     return ResponseEntity.ok(service.delete(ids));
   }
 }

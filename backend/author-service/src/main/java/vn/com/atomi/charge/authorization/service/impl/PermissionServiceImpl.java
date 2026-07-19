@@ -9,7 +9,10 @@ import vn.com.atomi.charge.authorization.repository.PermissionRepo;
 import vn.com.atomi.charge.authorization.service.interfaces.PermissionService;
 import vn.com.atomi.charge.base.service.BaseService;
 
+import java.util.UUID;
+
+
 @Service
-public class PermissionServiceImpl extends BaseService<PermissionRepo, PermissionDto, PermissionEntity, PermissionMapper> implements PermissionService{
+public class PermissionServiceImpl extends BaseService<PermissionRepo, PermissionDto, PermissionEntity, PermissionMapper, UUID> implements PermissionService{
     
 }

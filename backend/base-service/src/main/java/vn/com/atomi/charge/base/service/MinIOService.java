@@ -7,8 +7,12 @@ import org.apache.tika.Tika;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypes;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import io.minio.MinioClient;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -27,6 +31,7 @@ import java.io.InputStream;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@ConditionalOnBean(MinioClient.class)
 public class MinIOService {
 
     @Value("${config.minio.bucket}")

@@ -1,6 +1,7 @@
 package vn.com.atomi.charge.base.config.mail;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -9,6 +10,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import java.util.Properties;
 
 @Configuration
+@ConditionalOnProperty(name = "atomi.mail.enabled", havingValue = "true")
 public class MailConfig {
 
   @Value("${config.mail.host}")

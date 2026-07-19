@@ -7,9 +7,11 @@ import vn.com.atomi.charge.authorization.service.interfaces.PermissionService;
 
 import vn.com.atomi.charge.base.controller.BaseController;
 
+import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/api/v1/internal/permissions")
-public class PermissionController extends BaseController<PermissionService, PermissionDto>{
+public class PermissionController extends BaseController<PermissionService, PermissionDto, UUID>{
     
 }

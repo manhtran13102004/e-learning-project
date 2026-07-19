@@ -9,14 +9,15 @@ import vn.com.atomi.charge.base.model.response.BaseResponse;
 import vn.com.atomi.charge.base.model.entity.BaseEntity;
 import vn.com.atomi.charge.base.repository.BaseRepository;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public interface IBaseService <R extends BaseRepository, D extends BaseDto, E extends BaseEntity, M extends EntityMapper> {
+public interface IBaseService <R extends BaseRepository, D extends BaseDto, E extends BaseEntity, M extends EntityMapper, ID extends Serializable> {
   public abstract BaseResponse<D> create(BaseRequest<D> dto);
   public abstract BaseResponse<D> update(BaseRequest<D> dto);
   public abstract BaseResponse<Page<D>> getAll(Map<String, String> params, Pageable pageable);
-  public abstract BaseResponse<D> getDetails(String id);
-  public abstract BaseResponse<D> delete(String id);
-  public abstract BaseResponse<D> delete(List<String> ids);
+  public abstract BaseResponse<D> getDetails(ID id);
+  public abstract BaseResponse<D> delete(ID id);
+  public abstract BaseResponse<D> delete(List<ID> ids);
 }

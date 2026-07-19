@@ -2,6 +2,7 @@ package vn.com.atomi.charge.base.config.minIO;
 
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -13,6 +14,7 @@ import software.amazon.awssdk.services.s3.S3Configuration;
 import java.net.URI;
 
 @Configuration
+@ConditionalOnProperty(name = "atomi.minio.enabled", havingValue = "true")
 public class S3ClientConfig {
 
     @Value("${config.minio.url}")

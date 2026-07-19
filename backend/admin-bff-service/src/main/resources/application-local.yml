@@ -6,3 +6,4 @@ spring:
       discovery:
         instance-id: admin-bff-service
 
+config:
